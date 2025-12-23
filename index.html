@@ -585,7 +585,7 @@
         </main>
 
         <!-- Bottom Navigation -->
-        <nav class="bg-white border-t border-gray-200 flex justify-around items-center h-16 shrink-0 z-30 pb-safe">
+        <nav class="bg-white border-t border-gray-200 flex justify-around items-center h-16 shrink-0 z-30 pb-safe relative">
             <button @click="setView('dashboard')" :class="currentView === 'dashboard' ? 'text-blue-600' : 'text-gray-400'" class="flex flex-col items-center justify-center w-full h-full">
                 <i class="fa-solid fa-house text-xl mb-1"></i>
                 <span class="text-[10px] font-medium">首頁</span>
@@ -594,9 +594,12 @@
                 <i class="fa-solid fa-map-location-dot text-xl mb-1"></i>
                 <span class="text-[10px] font-medium">地圖</span>
             </button>
-            <button class="relative -top-5 bg-yellow-400 text-white w-14 h-14 rounded-full shadow-lg flex items-center justify-center border-4 border-gray-100 transform active:scale-95 transition" @click="quickLog">
+            
+            <!-- 修正後的中央按鈕：加大尺寸至 w-16 h-16，位置上移至 -top-8，確保黃色區域足夠寬敞 -->
+            <button class="relative -top-8 bg-yellow-400 text-white w-16 h-16 rounded-full shadow-lg flex items-center justify-center border-4 border-white transform active:scale-95 transition z-10" @click="quickLog">
                 <i class="fa-solid fa-person-hiking text-2xl"></i>
             </button>
+            
             <button @click="setView('stages')" :class="currentView === 'stages' ? 'text-blue-600' : 'text-gray-400'" class="flex flex-col items-center justify-center w-full h-full">
                 <i class="fa-solid fa-list-check text-xl mb-1"></i>
                 <span class="text-[10px] font-medium">路段</span>
