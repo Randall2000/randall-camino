@@ -87,11 +87,9 @@
         </header>
 
         <!-- Main Content Area -->
-        <!-- 修正：移除這裡的 pb-32，改到各個子視圖中設定，以免影響地圖高度 -->
         <main class="flex-grow overflow-y-auto hide-scrollbar relative bg-gray-50">
             
             <!-- VIEW: DASHBOARD -->
-            <!-- 修正：在此處加入 pb-32 以防止內容被按鈕遮擋 -->
             <div v-if="currentView === 'dashboard'" class="p-4 space-y-4 pb-32">
                 
                 <!-- Weather Forecast & Clothing Advice Widget (Collapsible) -->
@@ -212,7 +210,6 @@
             </div>
 
             <!-- VIEW: MAP -->
-            <!-- 修正：地圖容器現在可以正確佔滿剩餘高度，不會有額外的底部 padding -->
             <div v-show="currentView === 'map'" class="h-full relative w-full">
                 <div id="map" class="w-full h-full"></div>
                 
@@ -220,6 +217,10 @@
                 <div class="absolute top-4 right-4 z-[400] flex flex-col gap-2">
                     <button @click="locateUser" class="bg-white w-10 h-10 rounded-full shadow-md flex items-center justify-center text-blue-600 active:bg-gray-100">
                         <i class="fa-solid fa-location-crosshairs"></i>
+                    </button>
+                    <!-- 新增：全覽路線按鈕 -->
+                    <button @click="fitRoute" class="bg-white w-10 h-10 rounded-full shadow-md flex items-center justify-center text-yellow-500 active:bg-gray-100">
+                        <i class="fa-solid fa-route"></i>
                     </button>
                     <button @click="downloadOfflineMap" class="bg-white w-10 h-10 rounded-full shadow-md flex items-center justify-center text-gray-600 active:bg-gray-100">
                         <i class="fa-solid fa-download"></i>
@@ -323,7 +324,6 @@
             </div>
 
             <!-- VIEW: STAGES -->
-            <!-- 修正：在此處加入 pb-32 -->
             <div v-if="currentView === 'stages'" class="p-4 space-y-3 pb-32">
                 <div class="flex justify-between items-center mb-2">
                     <h2 class="font-bold text-xl">20 天戰略規劃</h2>
@@ -444,7 +444,6 @@
                     <button @click="guideTab = 'emergency'" :class="guideTab === 'emergency' ? 'border-red-600 text-red-600' : 'border-transparent text-gray-500'" class="flex-1 py-3 text-sm font-medium border-b-2 transition">緊急資訊</button>
                 </div>
 
-                <!-- 修正：在此處加入 pb-32 -->
                 <div class="p-4 overflow-y-auto pb-32">
                     <!-- Packing List -->
                     <div v-if="guideTab === 'packing'">
@@ -589,7 +588,6 @@
         </main>
 
         <!-- Bottom Navigation -->
-        <!-- 修正：使用 grid grid-cols-5 + px-6 padding 讓按鈕均分且往內縮 -->
         <nav class="bg-white border-t border-gray-200 grid grid-cols-5 h-16 shrink-0 z-30 pb-safe relative px-6">
             <button @click="setView('dashboard')" :class="currentView === 'dashboard' ? 'text-blue-600' : 'text-gray-400'" class="flex flex-col items-center justify-center h-full">
                 <i class="fa-solid fa-house text-xl mb-1"></i>
@@ -602,8 +600,8 @@
             
             <!-- 中間按鈕區塊 -->
             <div class="flex justify-center items-center relative">
-                <button class="absolute -top-8 bg-yellow-400 text-white w-16 h-16 rounded-full shadow-lg flex items-center justify-center border-4 border-white transform active:scale-95 transition z-10" @click="quickLog">
-                    <i class="fa-solid fa-person-hiking text-2xl"></i>
+                <button class="absolute -top-8 bg-yellow-400 text-white w-20 h-20 rounded-full shadow-xl flex items-center justify-center border-4 border-white transform active:scale-95 transition z-40 overflow-visible" @click="quickLog">
+                    <i class="fa-solid fa-person-hiking text-3xl"></i>
                 </button>
             </div>
             
@@ -958,10 +956,25 @@
                         nextTick(() => {
                             initMap();
                             map.invalidateSize(); // 解決地圖在 hidden 後大小錯誤問題
+                            // 強制重新計算路線範圍 (如果地圖已存在)
+                            if (map) {
+                                fitRoute();
+                            }
                         });
                     }
                 };
                 
+                // 計算並縮放至路線範圍
+                const fitRoute = () => {
+                    if (!map) return;
+                    const routeCoordinates = [
+                        [startPoint.lat, startPoint.lng], // 起點
+                        ...stages.value.map(s => [s.lat, s.lng]) // 各路段終點
+                    ];
+                    const bounds = L.latLngBounds(routeCoordinates);
+                    map.fitBounds(bounds, { padding: [50, 50] });
+                };
+
                 // 跳轉並定位到特定路段
                 const flyToStage = (index) => {
                     setView('map');
@@ -1191,9 +1204,7 @@
                     updateMapMarkers();
 
                     // 自動縮放地圖以顯示整條路線
-                    // 建立一個 Bounds 包含起點和終點
-                    const bounds = L.latLngBounds(routeCoordinates);
-                    map.fitBounds(bounds, { padding: [50, 50] });
+                    fitRoute();
                 };
 
                 const updateMapMarkers = () => {
@@ -1313,6 +1324,7 @@
                     hourlyForecast, 
                     clothingAdvice, 
                     isWeatherExpanded,
+                    fitRoute, // 新增的函式
                     // Swipe
                     handleTouchStart: onSwipeStart,
                     handleTouchMove: onSwipeMove,
