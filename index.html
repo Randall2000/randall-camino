@@ -87,10 +87,11 @@
         </header>
 
         <!-- Main Content Area -->
-        <main class="flex-grow overflow-y-auto hide-scrollbar relative bg-gray-50">
+        <!-- 修正：將 pb-20 改為 pb-32，確保最底部的內容不會被浮動按鈕遮擋 -->
+        <main class="flex-grow overflow-y-auto hide-scrollbar relative bg-gray-50 pb-32">
             
             <!-- VIEW: DASHBOARD -->
-            <div v-if="currentView === 'dashboard'" class="p-4 space-y-4 pb-20">
+            <div v-if="currentView === 'dashboard'" class="p-4 space-y-4">
                 
                 <!-- Weather Forecast & Clothing Advice Widget (Collapsible) -->
                 <div class="bg-gradient-to-br from-blue-600 to-blue-400 rounded-2xl text-white shadow-lg relative overflow-hidden transition-all duration-300"
@@ -188,7 +189,8 @@
                         </span>
                     </div>
                     <div class="flex gap-3">
-                        <div class="w-20 h-20 rounded-lg bg-blue-100 flex items-center justify-center shrink-0 text-blue-500">
+                        <!-- 修正：將 rounded-lg 改為 rounded-full (圓形) -->
+                        <div class="w-20 h-20 rounded-full bg-blue-100 flex items-center justify-center shrink-0 text-blue-500">
                             <i class="fa-solid fa-bed text-3xl"></i>
                         </div>
                         <div class="flex-1 min-w-0">
@@ -321,7 +323,7 @@
             </div>
 
             <!-- VIEW: STAGES -->
-            <div v-if="currentView === 'stages'" class="p-4 space-y-3 pb-20">
+            <div v-if="currentView === 'stages'" class="p-4 space-y-3">
                 <div class="flex justify-between items-center mb-2">
                     <h2 class="font-bold text-xl">20 天戰略規劃</h2>
                     <span class="text-xs bg-yellow-100 text-yellow-800 px-2 py-1 rounded">步行總計 {{ totalKm.toFixed(1) }} km</span>
@@ -504,15 +506,16 @@
                                              @mouseup="handleTouchEnd($event)"
                                              @mouseleave="handleTouchEnd($event)">
                                             
-                                            <!-- Checkbox Area -->
-                                            <div @click="!isSwiping && toggleItem(catName, idx)" class="cursor-pointer shrink-0 p-1">
-                                                <div class="w-5 h-5 rounded border flex items-center justify-center transition-colors"
-                                                     :class="item.checked ? 'bg-blue-500 border-blue-500 text-white' : 'border-gray-300 text-transparent'">
-                                                    <i class="fa-solid fa-check text-xs"></i>
-                                                </div>
-                                            </div>
+                                    <!-- Checkbox -->
+                                    <div @click="!isSwiping && toggleItem(catName, idx)" class="cursor-pointer shrink-0 p-1">
+                                        <!-- 修正：將 rounded 改為 rounded-full (圓形勾選框) -->
+                                        <div class="w-5 h-5 rounded-full border flex items-center justify-center transition-colors"
+                                             :class="item.checked ? 'bg-blue-500 border-blue-500 text-white' : 'border-gray-300 text-transparent'">
+                                            <i class="fa-solid fa-check text-xs"></i>
+                                        </div>
+                                    </div>
 
-                                            <!-- Content Area -->
+                                    <!-- Content Area -->
                                             <div class="flex-1 flex justify-between items-center cursor-pointer" @click="!isSwiping && toggleItem(catName, idx)">
                                                 <span :class="{'text-gray-400 line-through': item.checked}">{{ item.name }}</span>
                                                 <span v-if="item.weight" class="text-xs text-gray-400 bg-gray-50 px-1.5 py-0.5 rounded ml-2 whitespace-nowrap">{{ item.weight }}g</span>
@@ -595,9 +598,9 @@
                 <span class="text-[10px] font-medium">地圖</span>
             </button>
             
-            <!-- 修正後的中央按鈕：加大尺寸至 w-16 h-16，位置上移至 -top-8，確保黃色區域足夠寬敞 -->
-            <button class="relative -top-8 bg-yellow-400 text-white w-16 h-16 rounded-full shadow-lg flex items-center justify-center border-4 border-white transform active:scale-95 transition z-10" @click="quickLog">
-                <i class="fa-solid fa-person-hiking text-2xl"></i>
+            <!-- 修正後的中央按鈕：加大尺寸至 w-20 h-20，位置上移至 -top-10，確保黃色區域足夠寬敞 -->
+            <button class="relative -top-10 bg-yellow-400 text-white w-20 h-20 rounded-full shadow-xl flex items-center justify-center border-4 border-white transform active:scale-95 transition z-40 overflow-visible" @click="quickLog">
+                <i class="fa-solid fa-person-hiking text-3xl"></i>
             </button>
             
             <button @click="setView('stages')" :class="currentView === 'stages' ? 'text-blue-600' : 'text-gray-400'" class="flex flex-col items-center justify-center w-full h-full">
