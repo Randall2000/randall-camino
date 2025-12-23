@@ -598,9 +598,9 @@
                 <span class="text-[10px] font-medium">地圖</span>
             </button>
             
-            <!-- 修正後的中央按鈕：加大尺寸至 w-20 h-20，位置上移至 -top-10，確保黃色區域足夠寬敞 -->
-            <button class="relative -top-10 bg-yellow-400 text-white w-20 h-20 rounded-full shadow-xl flex items-center justify-center border-4 border-white transform active:scale-95 transition z-40 overflow-visible" @click="quickLog">
-                <i class="fa-solid fa-person-hiking text-3xl"></i>
+            <!-- 修正：使用您指定的樣式，確保圓形、尺寸適中且位置正確 -->
+            <button class="relative -top-8 bg-yellow-400 text-white w-16 h-16 rounded-full shadow-lg flex items-center justify-center border-4 border-white transform active:scale-95 transition z-10" @click="quickLog">
+                <i class="fa-solid fa-person-hiking text-2xl"></i>
             </button>
             
             <button @click="setView('stages')" :class="currentView === 'stages' ? 'text-blue-600' : 'text-gray-400'" class="flex flex-col items-center justify-center w-full h-full">
