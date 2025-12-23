@@ -87,11 +87,12 @@
         </header>
 
         <!-- Main Content Area -->
-        <!-- 修正：將 pb-20 改為 pb-32，確保最底部的內容不會被浮動按鈕遮擋 -->
-        <main class="flex-grow overflow-y-auto hide-scrollbar relative bg-gray-50 pb-32">
+        <!-- 修正：移除這裡的 pb-32，改到各個子視圖中設定，以免影響地圖高度 -->
+        <main class="flex-grow overflow-y-auto hide-scrollbar relative bg-gray-50">
             
             <!-- VIEW: DASHBOARD -->
-            <div v-if="currentView === 'dashboard'" class="p-4 space-y-4">
+            <!-- 修正：在此處加入 pb-32 以防止內容被按鈕遮擋 -->
+            <div v-if="currentView === 'dashboard'" class="p-4 space-y-4 pb-32">
                 
                 <!-- Weather Forecast & Clothing Advice Widget (Collapsible) -->
                 <div class="bg-gradient-to-br from-blue-600 to-blue-400 rounded-2xl text-white shadow-lg relative overflow-hidden transition-all duration-300"
@@ -189,7 +190,6 @@
                         </span>
                     </div>
                     <div class="flex gap-3">
-                        <!-- 修正：將 rounded-lg 改為 rounded-full (圓形) -->
                         <div class="w-20 h-20 rounded-full bg-blue-100 flex items-center justify-center shrink-0 text-blue-500">
                             <i class="fa-solid fa-bed text-3xl"></i>
                         </div>
@@ -212,7 +212,7 @@
             </div>
 
             <!-- VIEW: MAP -->
-            <!-- 使用 v-show 保持地圖實例不被銷毀 -->
+            <!-- 修正：地圖容器現在可以正確佔滿剩餘高度，不會有額外的底部 padding -->
             <div v-show="currentView === 'map'" class="h-full relative w-full">
                 <div id="map" class="w-full h-full"></div>
                 
@@ -323,7 +323,8 @@
             </div>
 
             <!-- VIEW: STAGES -->
-            <div v-if="currentView === 'stages'" class="p-4 space-y-3">
+            <!-- 修正：在此處加入 pb-32 -->
+            <div v-if="currentView === 'stages'" class="p-4 space-y-3 pb-32">
                 <div class="flex justify-between items-center mb-2">
                     <h2 class="font-bold text-xl">20 天戰略規劃</h2>
                     <span class="text-xs bg-yellow-100 text-yellow-800 px-2 py-1 rounded">步行總計 {{ totalKm.toFixed(1) }} km</span>
@@ -443,7 +444,8 @@
                     <button @click="guideTab = 'emergency'" :class="guideTab === 'emergency' ? 'border-red-600 text-red-600' : 'border-transparent text-gray-500'" class="flex-1 py-3 text-sm font-medium border-b-2 transition">緊急資訊</button>
                 </div>
 
-                <div class="p-4 overflow-y-auto pb-20">
+                <!-- 修正：在此處加入 pb-32 -->
+                <div class="p-4 overflow-y-auto pb-32">
                     <!-- Packing List -->
                     <div v-if="guideTab === 'packing'">
                         <!-- Weight Dashboard -->
@@ -506,16 +508,15 @@
                                              @mouseup="handleTouchEnd($event)"
                                              @mouseleave="handleTouchEnd($event)">
                                             
-                                    <!-- Checkbox -->
-                                    <div @click="!isSwiping && toggleItem(catName, idx)" class="cursor-pointer shrink-0 p-1">
-                                        <!-- 修正：將 rounded 改為 rounded-full (圓形勾選框) -->
-                                        <div class="w-5 h-5 rounded-full border flex items-center justify-center transition-colors"
-                                             :class="item.checked ? 'bg-blue-500 border-blue-500 text-white' : 'border-gray-300 text-transparent'">
-                                            <i class="fa-solid fa-check text-xs"></i>
-                                        </div>
-                                    </div>
+                                            <!-- Checkbox Area -->
+                                            <div @click="!isSwiping && toggleItem(catName, idx)" class="cursor-pointer shrink-0 p-1">
+                                                <div class="w-5 h-5 rounded-full border flex items-center justify-center transition-colors"
+                                                     :class="item.checked ? 'bg-blue-500 border-blue-500 text-white' : 'border-gray-300 text-transparent'">
+                                                    <i class="fa-solid fa-check text-xs"></i>
+                                                </div>
+                                            </div>
 
-                                    <!-- Content Area -->
+                                            <!-- Content Area -->
                                             <div class="flex-1 flex justify-between items-center cursor-pointer" @click="!isSwiping && toggleItem(catName, idx)">
                                                 <span :class="{'text-gray-400 line-through': item.checked}">{{ item.name }}</span>
                                                 <span v-if="item.weight" class="text-xs text-gray-400 bg-gray-50 px-1.5 py-0.5 rounded ml-2 whitespace-nowrap">{{ item.weight }}g</span>
@@ -588,26 +589,29 @@
         </main>
 
         <!-- Bottom Navigation -->
-        <nav class="bg-white border-t border-gray-200 flex justify-around items-center h-16 shrink-0 z-30 pb-safe relative">
-            <button @click="setView('dashboard')" :class="currentView === 'dashboard' ? 'text-blue-600' : 'text-gray-400'" class="flex flex-col items-center justify-center w-full h-full">
+        <!-- 修正：使用 grid grid-cols-5 + px-6 padding 讓按鈕均分且往內縮 -->
+        <nav class="bg-white border-t border-gray-200 grid grid-cols-5 h-16 shrink-0 z-30 pb-safe relative px-6">
+            <button @click="setView('dashboard')" :class="currentView === 'dashboard' ? 'text-blue-600' : 'text-gray-400'" class="flex flex-col items-center justify-center h-full">
                 <i class="fa-solid fa-house text-xl mb-1"></i>
                 <span class="text-[10px] font-medium">首頁</span>
             </button>
-            <button @click="setView('map')" :class="currentView === 'map' ? 'text-blue-600' : 'text-gray-400'" class="flex flex-col items-center justify-center w-full h-full">
+            <button @click="setView('map')" :class="currentView === 'map' ? 'text-blue-600' : 'text-gray-400'" class="flex flex-col items-center justify-center h-full">
                 <i class="fa-solid fa-map-location-dot text-xl mb-1"></i>
                 <span class="text-[10px] font-medium">地圖</span>
             </button>
             
-            <!-- 修正：加入 mx-4 增加左右間距，並確保 shrink-0 不被壓縮 -->
-            <button class="relative -top-8 bg-yellow-400 text-white w-16 h-16 shrink-0 rounded-full shadow-lg flex items-center justify-center border-4 border-white transform active:scale-95 transition z-10 mx-4" @click="quickLog">
-                <i class="fa-solid fa-person-hiking text-2xl"></i>
-            </button>
+            <!-- 中間按鈕區塊 -->
+            <div class="flex justify-center items-center relative">
+                <button class="absolute -top-8 bg-yellow-400 text-white w-16 h-16 rounded-full shadow-lg flex items-center justify-center border-4 border-white transform active:scale-95 transition z-10" @click="quickLog">
+                    <i class="fa-solid fa-person-hiking text-2xl"></i>
+                </button>
+            </div>
             
-            <button @click="setView('stages')" :class="currentView === 'stages' ? 'text-blue-600' : 'text-gray-400'" class="flex flex-col items-center justify-center w-full h-full">
+            <button @click="setView('stages')" :class="currentView === 'stages' ? 'text-blue-600' : 'text-gray-400'" class="flex flex-col items-center justify-center h-full">
                 <i class="fa-solid fa-list-check text-xl mb-1"></i>
                 <span class="text-[10px] font-medium">路段</span>
             </button>
-            <button @click="setView('guide')" :class="currentView === 'guide' ? 'text-blue-600' : 'text-gray-400'" class="flex flex-col items-center justify-center w-full h-full">
+            <button @click="setView('guide')" :class="currentView === 'guide' ? 'text-blue-600' : 'text-gray-400'" class="flex flex-col items-center justify-center h-full">
                 <i class="fa-solid fa-book-open text-xl mb-1"></i>
                 <span class="text-[10px] font-medium">指南</span>
             </button>
@@ -623,7 +627,6 @@
     </div>
 
     <script>
-        // 加入 'watch' 到 Vue 的解構中
         const { createApp, ref, computed, onMounted, nextTick, watch } = Vue;
 
         createApp({
