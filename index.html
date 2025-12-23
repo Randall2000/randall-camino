@@ -598,8 +598,8 @@
                 <span class="text-[10px] font-medium">地圖</span>
             </button>
             
-            <!-- 修正：使用您指定的樣式，確保圓形、尺寸適中且位置正確 -->
-            <button class="relative -top-8 bg-yellow-400 text-white w-16 h-16 rounded-full shadow-lg flex items-center justify-center border-4 border-white transform active:scale-95 transition z-10" @click="quickLog">
+            <!-- 修正：加入 mx-4 增加左右間距，並確保 shrink-0 不被壓縮 -->
+            <button class="relative -top-8 bg-yellow-400 text-white w-16 h-16 shrink-0 rounded-full shadow-lg flex items-center justify-center border-4 border-white transform active:scale-95 transition z-10 mx-4" @click="quickLog">
                 <i class="fa-solid fa-person-hiking text-2xl"></i>
             </button>
             
