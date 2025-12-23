@@ -588,7 +588,11 @@
         </main>
 
         <!-- Bottom Navigation -->
-        <nav class="bg-white border-t border-gray-200 grid grid-cols-5 h-16 shrink-0 z-30 pb-safe relative px-6">
+        <!-- 修正：
+             1. 將 grid-cols-5 改為 grid-cols-[1fr_1fr_1.5fr_1fr_1fr]，讓中間欄位變寬，把左右按鈕推開。
+             2. 將 px-6 調整為 px-2，釋放更多橫向空間。 
+        -->
+        <nav class="bg-white border-t border-gray-200 grid grid-cols-[1fr_1fr_1.5fr_1fr_1fr] h-16 shrink-0 z-30 pb-safe relative px-2">
             <button @click="setView('dashboard')" :class="currentView === 'dashboard' ? 'text-blue-600' : 'text-gray-400'" class="flex flex-col items-center justify-center h-full">
                 <i class="fa-solid fa-house text-xl mb-1"></i>
                 <span class="text-[10px] font-medium">首頁</span>
