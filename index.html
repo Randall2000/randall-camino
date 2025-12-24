@@ -87,10 +87,12 @@
         </header>
 
         <!-- Main Content Area -->
-        <main class="flex-grow overflow-y-auto hide-scrollbar relative bg-gray-50">
+        <!-- 修正：將 pb-32 改為 pb-36，配合變高的導覽列 -->
+        <main class="flex-grow overflow-y-auto hide-scrollbar relative bg-gray-50 pb-36">
             
             <!-- VIEW: DASHBOARD -->
-            <div v-if="currentView === 'dashboard'" class="p-4 space-y-4 pb-32">
+            <!-- 修正：將 pb-32 改為 pb-36 -->
+            <div v-if="currentView === 'dashboard'" class="p-4 space-y-4 pb-36">
                 
                 <!-- Weather Forecast & Clothing Advice Widget (Collapsible) -->
                 <div class="bg-gradient-to-br from-blue-600 to-blue-400 rounded-2xl text-white shadow-lg relative overflow-hidden transition-all duration-300"
@@ -324,7 +326,7 @@
             </div>
 
             <!-- VIEW: STAGES -->
-            <div v-if="currentView === 'stages'" class="p-4 space-y-3 pb-32">
+            <div v-if="currentView === 'stages'" class="p-4 space-y-3 pb-36">
                 <div class="flex justify-between items-center mb-2">
                     <h2 class="font-bold text-xl">20 天戰略規劃</h2>
                     <span class="text-xs bg-yellow-100 text-yellow-800 px-2 py-1 rounded">步行總計 {{ totalKm.toFixed(1) }} km</span>
@@ -444,7 +446,7 @@
                     <button @click="guideTab = 'emergency'" :class="guideTab === 'emergency' ? 'border-red-600 text-red-600' : 'border-transparent text-gray-500'" class="flex-1 py-3 text-sm font-medium border-b-2 transition">緊急資訊</button>
                 </div>
 
-                <div class="p-4 overflow-y-auto pb-32">
+                <div class="p-4 overflow-y-auto pb-36">
                     <!-- Packing List -->
                     <div v-if="guideTab === 'packing'">
                         <!-- Weight Dashboard -->
@@ -589,10 +591,10 @@
 
         <!-- Bottom Navigation -->
         <!-- 修正：
-             1. 將 grid-cols-5 改為 grid-cols-[1fr_1fr_1.5fr_1fr_1fr]，讓中間欄位變寬，把左右按鈕推開。
-             2. 將 px-6 調整為 px-2，釋放更多橫向空間。 
+             1. 將 h-16 (64px) 改為 h-20 (80px)，增加導覽列高度。
+             2. 維持 grid 和 padding 設定。
         -->
-        <nav class="bg-white border-t border-gray-200 grid grid-cols-[1fr_1fr_1.5fr_1fr_1fr] h-16 shrink-0 z-30 pb-safe relative px-2">
+        <nav class="bg-white border-t border-gray-200 grid grid-cols-[1fr_1fr_1.5fr_1fr_1fr] h-20 shrink-0 z-30 pb-safe relative px-2">
             <button @click="setView('dashboard')" :class="currentView === 'dashboard' ? 'text-blue-600' : 'text-gray-400'" class="flex flex-col items-center justify-center h-full">
                 <i class="fa-solid fa-house text-xl mb-1"></i>
                 <span class="text-[10px] font-medium">首頁</span>
