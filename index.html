@@ -87,11 +87,11 @@
         </header>
 
         <!-- Main Content Area -->
-        <!-- 修正：將 pb-32 改為 pb-36，配合變高的導覽列 -->
-        <main class="flex-grow overflow-y-auto hide-scrollbar relative bg-gray-50 pb-36">
+        <!-- 修正：移除這裡的 pb-36，讓 <main> 可以佔滿剩餘高度，解決地圖變短的問題 -->
+        <main class="flex-grow overflow-y-auto hide-scrollbar relative bg-gray-50">
             
             <!-- VIEW: DASHBOARD -->
-            <!-- 修正：將 pb-32 改為 pb-36 -->
+            <!-- 保持這裡的 pb-36，防止內容被下方導覽列遮擋 -->
             <div v-if="currentView === 'dashboard'" class="p-4 space-y-4 pb-36">
                 
                 <!-- Weather Forecast & Clothing Advice Widget (Collapsible) -->
