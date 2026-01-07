@@ -642,7 +642,7 @@
                 const guideTab = ref('packing');
                 const toastMsg = ref('');
                 const expandedStageIndex = ref(null);
-                const isWeatherExpanded = ref(true);
+                const isWeatherExpanded = ref(false); // 修正：預設為 false (收合)
                 
                 // 編輯相關狀態
                 const editingState = ref({ category: null, index: null });
