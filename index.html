@@ -87,11 +87,9 @@
         </header>
 
         <!-- Main Content Area -->
-        <!-- 修正：移除這裡的 pb-36，讓 <main> 可以佔滿剩餘高度，解決地圖變短的問題 -->
         <main class="flex-grow overflow-y-auto hide-scrollbar relative bg-gray-50">
             
             <!-- VIEW: DASHBOARD -->
-            <!-- 保持這裡的 pb-36，防止內容被下方導覽列遮擋 -->
             <div v-if="currentView === 'dashboard'" class="p-4 space-y-4 pb-36">
                 
                 <!-- Weather Forecast & Clothing Advice Widget (Collapsible) -->
@@ -211,11 +209,9 @@
                 </div>
 
                 <!-- My Journey Logs (New Section) -->
-                <!-- 修正：移除 v-if，讓區塊總是顯示 -->
                 <div class="space-y-2">
                     <div class="flex justify-between items-center px-1">
                         <h3 class="font-bold text-gray-700">我的足跡 ({{ journeyLogs.length }})</h3>
-                        <!-- 修正：只有在有紀錄時才顯示清除按鈕 -->
                         <button v-if="journeyLogs.length > 0" @click="clearLogs" class="text-xs text-gray-400 hover:text-red-500">全部清除</button>
                     </div>
                     
@@ -229,9 +225,7 @@
                             <div class="flex-1 min-w-0">
                                 <div class="flex justify-between items-start">
                                     <span class="font-bold text-gray-800 text-sm">打卡紀錄 #{{ journeyLogs.length - idx }}</span>
-                                    <!-- 移除原本顯示在右側的時間 -->
                                 </div>
-                                <!-- 修正：將日期與時間顯示在同一行 -->
                                 <p class="text-xs text-gray-500 mt-0.5">{{ log.date }} {{ log.time }}</p>
                                 <p v-if="log.coords" class="text-[10px] text-blue-400 mt-1 flex items-center gap-1 cursor-pointer" @click="openGoogleMaps(log.coords)">
                                     <i class="fa-solid fa-map-pin"></i> {{ log.coords }}
@@ -267,7 +261,8 @@
             </div>
 
             <!-- VIEW: MAP -->
-            <div v-show="currentView === 'map'" class="h-full relative w-full">
+            <!-- 修正：將 h-full 換成 absolute inset-0，強制佔滿容器，不受 flex 影響 -->
+            <div v-show="currentView === 'map'" class="absolute inset-0 w-full h-full z-10">
                 <div id="map" class="w-full h-full"></div>
                 
                 <!-- Map Controls Overlay -->
@@ -648,10 +643,6 @@
         </main>
 
         <!-- Bottom Navigation -->
-        <!-- 修正：
-             1. 將 h-16 (64px) 改為 h-20 (80px)，增加導覽列高度。
-             2. 維持 grid 和 padding 設定。
-        -->
         <nav class="bg-white border-t border-gray-200 grid grid-cols-[1fr_1fr_1.5fr_1fr_1fr] h-20 shrink-0 z-30 pb-safe relative px-2">
             <button @click="setView('dashboard')" :class="currentView === 'dashboard' ? 'text-blue-600' : 'text-gray-400'" class="flex flex-col items-center justify-center h-full">
                 <i class="fa-solid fa-house text-xl mb-1"></i>
@@ -697,7 +688,7 @@
                 const guideTab = ref('packing');
                 const toastMsg = ref('');
                 const expandedStageIndex = ref(null);
-                const isWeatherExpanded = ref(false);
+                const isWeatherExpanded = ref(false); // 預設收合
                 const journeyLogs = ref([]); // 新增：旅程紀錄
                 
                 // 編輯相關狀態
