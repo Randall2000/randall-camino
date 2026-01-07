@@ -1069,44 +1069,52 @@
                 };
 
                 // 快速打卡功能 (Quick Log)
+                // 修正：改為「樂觀UI」模式，先新增資料到畫面，再於背景取得座標
                 const quickLog = () => {
                     const now = new Date();
                     const dateStr = now.toLocaleDateString();
                     const timeStr = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
                     
+                    // 1. 立即建立紀錄物件 (初始座標設為 "定位中...")
                     const newLog = {
                         id: Date.now(),
                         date: dateStr,
                         time: timeStr,
-                        coords: null,
-                        note: '' // 新增備註欄位
+                        coords: '定位中...',
+                        note: ''
                     };
 
-                    // 嘗試獲取位置
+                    // 2. 馬上推入陣列，讓畫面更新
+                    journeyLogs.value.push(newLog);
+                    showToast("⏳ 正在取得位置...");
+
+                    // 3. 開始獲取位置
                     if (navigator.geolocation) {
                         navigator.geolocation.getCurrentPosition(
                             (pos) => {
                                 const lat = pos.coords.latitude.toFixed(4);
                                 const lng = pos.coords.longitude.toFixed(4);
-                                newLog.coords = `${lat}, ${lng}`;
-                                journeyLogs.value.push(newLog);
-                                showToast("📍 打卡成功！已記錄位置");
-                                saveState(); // 立即存檔
+                                
+                                // 找到剛剛那筆紀錄並更新座標
+                                const targetLog = journeyLogs.value.find(l => l.id === newLog.id);
+                                if (targetLog) {
+                                    targetLog.coords = `${lat}, ${lng}`;
+                                    showToast("📍 定位成功！");
+                                }
                             },
                             (err) => {
                                 console.warn("定位失敗", err);
-                                newLog.coords = "定位失敗 (僅時間)";
-                                journeyLogs.value.push(newLog);
-                                showToast("⏰ 打卡成功！(無位置資訊)");
-                                saveState(); // 立即存檔
+                                const targetLog = journeyLogs.value.find(l => l.id === newLog.id);
+                                if (targetLog) {
+                                    targetLog.coords = "定位失敗";
+                                    showToast("⚠️ 無法取得位置");
+                                }
                             },
-                            { timeout: 5000 }
+                            { timeout: 10000, enableHighAccuracy: true }
                         );
                     } else {
-                        newLog.coords = "裝置不支援定位";
-                        journeyLogs.value.push(newLog);
-                        showToast("⏰ 打卡成功！");
-                        saveState(); // 立即存檔
+                        const targetLog = journeyLogs.value.find(l => l.id === newLog.id);
+                        if (targetLog) targetLog.coords = "不支援定位";
                     }
                 };
 
@@ -1308,8 +1316,13 @@
                     journeyLayerGroup.clearLayers();
 
                     // 解析座標資料
+                    // 修正：增加過濾條件，排除 "定位中..." 或無效的座標字串，防止地圖報錯
                     const validPoints = journeyLogs.value
-                        .filter(log => log.coords && !log.coords.includes('失敗') && !log.coords.includes('不支援'))
+                        .filter(log => {
+                            if (!log.coords) return false;
+                            // 檢查是否包含數字與逗號的有效座標格式
+                            return /^-?\d+(\.\d+)?,\s*-?\d+(\.\d+)?$/.test(log.coords);
+                        })
                         .map(log => {
                             const [lat, lng] = log.coords.split(',').map(Number);
                             return { lat, lng, ...log };
