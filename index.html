@@ -229,9 +229,10 @@
                             <div class="flex-1 min-w-0">
                                 <div class="flex justify-between items-start">
                                     <span class="font-bold text-gray-800 text-sm">打卡紀錄 #{{ journeyLogs.length - idx }}</span>
-                                    <span class="text-[10px] text-gray-400">{{ log.time }}</span>
+                                    <!-- 移除原本顯示在右側的時間 -->
                                 </div>
-                                <p class="text-xs text-gray-500 mt-0.5">{{ log.date }}</p>
+                                <!-- 修正：將日期與時間顯示在同一行 -->
+                                <p class="text-xs text-gray-500 mt-0.5">{{ log.date }} {{ log.time }}</p>
                                 <p v-if="log.coords" class="text-[10px] text-blue-400 mt-1 flex items-center gap-1 cursor-pointer" @click="openGoogleMaps(log.coords)">
                                     <i class="fa-solid fa-map-pin"></i> {{ log.coords }}
                                 </p>
