@@ -87,10 +87,10 @@
         </header>
 
         <!-- Main Content Area -->
-        <main class="flex-grow overflow-y-auto hide-scrollbar relative bg-gray-50">
+        <main class="flex-grow overflow-y-auto hide-scrollbar relative bg-gray-50 flex flex-col">
             
             <!-- VIEW: DASHBOARD -->
-            <div v-if="currentView === 'dashboard'" class="p-4 space-y-4 pb-36">
+            <div v-if="currentView === 'dashboard'" class="p-4 space-y-4 pb-36 shrink-0">
                 
                 <!-- Weather Forecast & Clothing Advice Widget (Collapsible) -->
                 <div class="bg-gradient-to-br from-blue-600 to-blue-400 rounded-2xl text-white shadow-lg relative overflow-hidden transition-all duration-300"
@@ -261,9 +261,9 @@
             </div>
 
             <!-- VIEW: MAP -->
-            <!-- 修正：將 h-full 換成 absolute inset-0，強制佔滿容器，不受 flex 影響 -->
-            <div v-show="currentView === 'map'" class="absolute inset-0 w-full h-full z-10">
-                <div id="map" class="w-full h-full"></div>
+            <!-- 修正：使用 h-full flex-grow 確保地圖填滿容器，避免高度塌陷 -->
+            <div v-show="currentView === 'map'" class="flex-grow w-full h-full relative z-10">
+                <div id="map" class="absolute inset-0 w-full h-full"></div>
                 
                 <!-- Map Controls Overlay -->
                 <div class="absolute top-4 right-4 z-[400] flex flex-col gap-2">
@@ -379,7 +379,7 @@
             </div>
 
             <!-- VIEW: STAGES -->
-            <div v-if="currentView === 'stages'" class="p-4 space-y-3 pb-36">
+            <div v-if="currentView === 'stages'" class="p-4 space-y-3 pb-36 shrink-0">
                 <div class="flex justify-between items-center mb-2">
                     <h2 class="font-bold text-xl">20 天戰略規劃</h2>
                     <span class="text-xs bg-yellow-100 text-yellow-800 px-2 py-1 rounded">步行總計 {{ totalKm.toFixed(1) }} km</span>
@@ -499,7 +499,7 @@
                     <button @click="guideTab = 'emergency'" :class="guideTab === 'emergency' ? 'border-red-600 text-red-600' : 'border-transparent text-gray-500'" class="flex-1 py-3 text-sm font-medium border-b-2 transition">緊急資訊</button>
                 </div>
 
-                <div class="p-4 overflow-y-auto pb-36">
+                <div class="p-4 overflow-y-auto pb-36 shrink-0">
                     <!-- Packing List -->
                     <div v-if="guideTab === 'packing'">
                         <!-- Weight Dashboard -->
