@@ -211,12 +211,16 @@
                 </div>
 
                 <!-- My Journey Logs (New Section) -->
-                <div v-if="journeyLogs.length > 0" class="space-y-2">
+                <!-- 修正：移除 v-if，讓區塊總是顯示 -->
+                <div class="space-y-2">
                     <div class="flex justify-between items-center px-1">
                         <h3 class="font-bold text-gray-700">我的足跡 ({{ journeyLogs.length }})</h3>
-                        <button @click="clearLogs" class="text-xs text-gray-400 hover:text-red-500">全部清除</button>
+                        <!-- 修正：只有在有紀錄時才顯示清除按鈕 -->
+                        <button v-if="journeyLogs.length > 0" @click="clearLogs" class="text-xs text-gray-400 hover:text-red-500">全部清除</button>
                     </div>
-                    <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+                    
+                    <!-- 有紀錄時顯示列表 -->
+                    <div v-if="journeyLogs.length > 0" class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
                         <div v-for="(log, idx) in journeyLogs.slice().reverse()" :key="log.id" 
                              class="p-4 border-b border-gray-100 last:border-0 flex items-start gap-3">
                             <div class="bg-yellow-100 text-yellow-600 w-8 h-8 rounded-full flex items-center justify-center shrink-0 text-xs mt-0.5">
@@ -247,6 +251,15 @@
                                 </button>
                             </div>
                         </div>
+                    </div>
+
+                    <!-- 無紀錄時顯示提示 (Empty State) -->
+                    <div v-else class="bg-white rounded-2xl p-8 border border-gray-100 border-dashed flex flex-col items-center justify-center text-center">
+                        <div class="bg-gray-50 w-12 h-12 rounded-full flex items-center justify-center mb-3 text-gray-300">
+                            <i class="fa-solid fa-shoe-prints text-xl"></i>
+                        </div>
+                        <p class="text-sm text-gray-500 font-medium">尚無足跡紀錄</p>
+                        <p class="text-xs text-gray-400 mt-1">點擊下方黃色按鈕開始記錄您的旅程！</p>
                     </div>
                 </div>
 
