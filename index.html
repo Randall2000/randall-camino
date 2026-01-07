@@ -87,10 +87,11 @@
         </header>
 
         <!-- Main Content Area -->
-        <main class="flex-grow overflow-y-auto hide-scrollbar relative bg-gray-50">
+        <!-- 修正：加入 flex flex-col 讓子元素可以使用 flex-grow 佔滿空間 -->
+        <main class="flex-grow overflow-y-auto hide-scrollbar relative bg-gray-50 flex flex-col">
             
             <!-- VIEW: DASHBOARD -->
-            <div v-if="currentView === 'dashboard'" class="p-4 space-y-4 pb-36">
+            <div v-if="currentView === 'dashboard'" class="p-4 space-y-4 pb-36 shrink-0">
                 
                 <!-- Weather Forecast & Clothing Advice Widget (Collapsible) -->
                 <div class="bg-gradient-to-br from-blue-600 to-blue-400 rounded-2xl text-white shadow-lg relative overflow-hidden transition-all duration-300"
@@ -261,8 +262,9 @@
             </div>
 
             <!-- VIEW: MAP -->
-            <div v-show="currentView === 'map'" class="absolute inset-0 w-full h-full z-10 bg-gray-100">
-                <div id="map" class="w-full h-full"></div>
+            <!-- 修正：改用 flex-grow 與 relative 佈局，讓地圖自動填滿剩餘空間，解決高度為 0 的問題 -->
+            <div v-show="currentView === 'map'" class="flex-grow w-full h-full relative z-10 bg-gray-100">
+                <div id="map" class="absolute inset-0 w-full h-full"></div>
                 
                 <!-- Map Controls Overlay -->
                 <div class="absolute top-4 right-4 z-[400] flex flex-col gap-2">
@@ -741,107 +743,88 @@
                     return "炎熱：請著透氣快乾短袖，注意防曬與補充水分。";
                 });
 
-                // 20 天詳細規劃路段資料 (Part 1 + Part 2 Bus/Rest + Part 3 Final)
+                // 20 天詳細規劃路段資料
                 const stages = ref([
                     // Part 1: Classic Beginning (Day 1-11)
                     { from: 'Saint-Jean-Pied-de-Port', to: 'Roncesvalles', km: 24.7, difficulty: 'Hard', terrain: 'Mountain', lat: 43.0094, lng: -1.3194, completed: false, 
                       startAlbergue: "(您在SJPP的住處)", 
                       endAlbergue: "Albergue de Peregrinos de Roncesvalles",
                       description: "精華保留。體驗最經典的庇里牛斯山挑戰。這是朝聖之路最艱難但也最壯麗的一天。" },
-                    
                     { from: 'Roncesvalles', to: 'Zubiri', km: 21.4, difficulty: 'Medium', terrain: 'Forest Path', lat: 42.9309, lng: -1.5034, completed: false, 
                       startAlbergue: "Albergue de Peregrinos de Roncesvalles", 
                       endAlbergue: "Albergue Municipal de Zubiri",
                       description: "讓雙腿在第一天翻山越嶺後得到恢復，穿梭在幽靜的森林小徑中。" },
-                    
                     { from: 'Zubiri', to: 'Pamplona', km: 20.8, difficulty: 'Easy', terrain: 'Road/Path', lat: 42.8125, lng: -1.6458, completed: false, 
                       startAlbergue: "Albergue Municipal de Zubiri", 
                       endAlbergue: "Albergue de Peregrinos Jesús y María",
                       description: "輕鬆走進第一個大城 Pamplona，記得去參觀大教堂並享用 Tapas！" },
-                    
                     { from: 'Pamplona', to: 'Puente la Reina', km: 24.3, difficulty: 'Medium', terrain: 'Alto del Perdón', lat: 42.6719, lng: -1.8153, completed: false, 
                       startAlbergue: "Albergue de Peregrinos Jesús y María", 
                       endAlbergue: "Albergue de Peregrinos de los Padres Reparadores",
                       description: "精華保留。攀登著名的「寬恕之嶺」(Alto del Perdón)，與朝聖者鐵雕合影。" },
-                    
                     { from: 'Puente la Reina', to: 'Estella', km: 21.9, difficulty: 'Medium', terrain: 'Rolling Hills', lat: 42.6713, lng: -2.0313, completed: false, 
                       startAlbergue: "Albergue de Peregrinos de los Padres Reparadores", 
                       endAlbergue: "Albergue Municipal de Peregrinos de Estella",
                       description: "享受中世紀村莊風光，Estella 被稱為「北方的托雷多」，歷史氛圍濃厚。" },
-                    
                     { from: 'Estella', to: 'Los Arcos', km: 21.6, difficulty: 'Medium', terrain: 'Rolling', lat: 42.5694, lng: -2.1906, completed: false, 
                       startAlbergue: "Albergue Municipal de Peregrinos de Estella", 
                       endAlbergue: "Albergue de Peregrinos Isaac Santiago",
                       description: "拜訪知名的 Irache 紅酒噴泉 (Fuente del Vino)，免費品嚐朝聖者紅酒！" },
-                    
                     { from: 'Los Arcos', to: 'Logroño', km: 27.9, difficulty: 'Hard', terrain: 'Rolling', lat: 42.4664, lng: -2.4456, completed: false, 
                       startAlbergue: "Albergue de Peregrinos Isaac Santiago", 
                       endAlbergue: "Albergue Municipal de Peregrinos de Logroño",
                       description: "舒適地走進 La Rioja 葡萄酒產區的首都 Logroño，晚上必去 Laurel 街吃 Pintxos。" },
-                    
                     { from: 'Logroño', to: 'Nájera', km: 29.3, difficulty: 'Hard', terrain: 'Vineyards', lat: 42.4156, lng: -2.7344, completed: false, 
                       startAlbergue: "Albergue Municipal de Peregrinos de Logroño", 
                       endAlbergue: "Albergue Municipal de Nájera",
                       description: "這是少數接近 30km 的一天，但地勢平坦，沿途經過美麗的葡萄園。" },
-                    
                     { from: 'Nájera', to: 'Santo Domingo de la Calzada', km: 21.1, difficulty: 'Easy', terrain: 'Rolling', lat: 42.4394, lng: -2.9536, completed: false, 
                       startAlbergue: "Albergue Municipal de Nájera", 
                       endAlbergue: "Albergue de Peregrinos de la Cofradía del Santo",
                       description: "輕鬆的一天，終點是著名的「雞舍奇蹟」教堂所在地。" },
-                    
                     { from: 'Santo Domingo de la Calzada', to: 'Belorado', km: 22.7, difficulty: 'Easy', terrain: 'Flat', lat: 42.4194, lng: -3.1911, completed: false, 
                       startAlbergue: "Albergue de Peregrinos de la Cofradía del Santo", 
                       endAlbergue: "Albergue de Peregrinos A Santiago",
                       description: "舒適地推進，Belorado 擁有不少舒適的私立庇護所。" },
-                    
                     { from: 'Belorado', to: 'Burgos', km: 27.5, difficulty: 'Medium', terrain: 'Flat/Urban', lat: 42.3408, lng: -3.7028, completed: false, 
                       startAlbergue: "Albergue de Peregrinos A Santiago", 
                       endAlbergue: "Albergue Municipal de Peregrinos de Burgos",
                       description: "穿越山丘與工業區，抵達擁有壯觀大教堂的 Burgos，這裡是第一階段的終點。" },
-
-                    // Part 2: Strategic Jump (Day 12-13)
+                    // Part 2
                     { from: 'Burgos', to: 'Sarria', km: 0, difficulty: 'None', type: 'bus', terrain: 'Bus Transfer', lat: 42.7778, lng: -7.4125, completed: false, 
-                      virtualKm: 399.7, // 關鍵：這是被跳過的距離
+                      virtualKm: 399.7, 
                       startAlbergue: "Albergue Municipal de Burgos (步行至巴士站)",
                       endAlbergue: "Albergue Internacional Monasterio de la Magdalena",
                       description: "🚌 巴士跳躍日：這就是節省時間的秘密！從 Burgos 悠閒探索後，搭乘 ALSA 巴士跳過 300 公里，直接抵達「最後100公里」的起點 Sarria。省下 10-12 天步行時間。" },
-                    
                     { from: 'Sarria', to: 'Sarria', km: 0, difficulty: 'None', type: 'rest', terrain: 'Rest Day', lat: 42.7778, lng: -7.4125, completed: false, 
                       startAlbergue: "Albergue Internacional Monasterio de la Magdalena",
                       endAlbergue: "Albergue Internacional Monasterio de la Magdalena",
                       description: "💤 恢復日：在 Sarria 徹底休息。洗滌衣物、採購補給，讓身體從長途車程中恢復，精神飽滿地準備最後衝刺。" },
-
-                    // Part 3: Final Chapter (Day 14-20)
+                    // Part 3
                     { from: 'Sarria', to: 'Portomarín', km: 22.5, difficulty: 'Easy', terrain: 'Rolling (Galicia)', lat: 42.8067, lng: -7.6156, completed: false, 
                       startAlbergue: "Albergue Internacional Monasterio de la Magdalena", 
                       endAlbergue: "Albergue de Peregrinos de la Xunta de Portomarín",
                       description: "精華保留。開始享受「最後100公里」的熱鬧與風景，沿途會有許多提供印章的小店。" },
-                    
                     { from: 'Portomarín', to: 'Palas de Rei', km: 25.1, difficulty: 'Medium', terrain: 'Hills', lat: 42.8739, lng: -7.8692, completed: false, 
                       startAlbergue: "Albergue de Peregrinos de la Xunta de Portomarín", 
                       endAlbergue: "Albergue de Peregrinos de la Xunta de Palas de Rei",
                       description: "典型的加利西亞丘陵地形，與來自世界各地的朝聖者同行，感受熱鬧氛圍。" },
-                    
                     { from: 'Palas de Rei', to: 'Arzúa', km: 29.0, difficulty: 'Hard', terrain: 'Rolling/Forest', lat: 42.9269, lng: -8.1644, completed: false, 
                       startAlbergue: "Albergue de Peregrinos de la Xunta de Palas de Rei", 
                       endAlbergue: "Albergue de Peregrinos de la Xunta de Arzúa",
                       description: "途經 Melide，一定要停下來吃頓著名的加利西亞章魚大餐 (Pulpo)！" },
-                    
                     { from: 'Arzúa', to: 'O Pedrouzo', km: 19.5, difficulty: 'Easy', terrain: 'Forest/Eucalyptus', lat: 42.9108, lng: -8.3617, completed: false, 
                       startAlbergue: "Albergue de Peregrinos de la Xunta de Arzúa", 
                       endAlbergue: "Albergue de Peregrinos de la Xunta de Arca do Pino",
                       description: "距離終點最近的一站，穿梭在充滿香氣的尤加利樹林中，心情開始激動。" },
-                    
                     { from: 'O Pedrouzo', to: 'Santiago de Compostela', km: 20.0, difficulty: 'Easy', terrain: 'Arrival', lat: 42.8805, lng: -8.5439, completed: false, 
                       startAlbergue: "Albergue de Peregrinos de la Xunta de Arca do Pino", 
                       endAlbergue: "Seminario Menor de la Asunción",
                       description: "榮耀日！悠閒地走完最後一程，目標在中午前抵達大教堂廣場，參加朝聖者彌撒。" },
-                    
                     { from: 'Santiago', to: 'Santiago', km: 0, difficulty: 'None', type: 'rest', terrain: 'Celebration', lat: 42.8805, lng: -8.5439, completed: false, 
                       startAlbergue: "Santiago de Compostela",
                       endAlbergue: "Santiago de Compostela",
                       description: "🎉 慶祝與探索日：領取堆肥證書、參觀大教堂、逛逛古城，享受屬於您的榮耀時刻。這是您應得的獎勵！" },
-                    
                     { from: 'Santiago', to: 'Santiago', km: 0, difficulty: 'None', type: 'rest', terrain: 'Buffer Day', lat: 42.8805, lng: -8.5439, completed: false, 
                       startAlbergue: "Santiago de Compostela",
                       endAlbergue: "Santiago de Compostela",
@@ -1296,13 +1279,11 @@
                 const showPoiOnMap = (poi) => {
                     selectedPOI.value = poi;
                     setView('map');
-                    // 這裡的 nextTick 會先觸發 setView 裡的 setTimeout
-                    // 然後下面的 flyTo 會在之後執行，但因為有 delay，所以會依序執行
-                    setTimeout(() => {
-                         if (map) {
+                    nextTick(() => {
+                        if (map) {
                             map.flyTo([poi.lat - 0.002, poi.lng], 16);
                         }
-                    }, 300);
+                    });
                 };
 
                 // 新增：在地圖上繪製足跡 (連線與點)
