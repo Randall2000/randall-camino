@@ -181,26 +181,46 @@
                 </div>
 
                 <!-- Next Stop: 今晚住宿 -->
-                <div v-if="nextStage && nextStage.endAlbergue" class="bg-white rounded-2xl p-5 shadow-sm border border-gray-100">
-                    <div class="flex justify-between items-center mb-3">
-                        <h3 class="font-bold text-gray-700">今晚住宿</h3>
-                        <span class="bg-blue-100 text-blue-700 text-xs px-2 py-1 rounded-full">Day {{ nextStage.day }} · {{ nextStage.date }}</span>
+                <div v-if="nextStage && nextStage.endAlbergue" class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+                    <!-- Header bar -->
+                    <div class="bg-blue-600 px-4 py-2.5 flex items-center justify-between">
+                        <span class="text-white text-xs font-semibold tracking-wide">今晚住宿</span>
+                        <span class="text-blue-200 text-xs">Day {{ nextStage.day }} · {{ nextStage.date }}</span>
                     </div>
-                    <div class="flex gap-3 items-center">
-                        <div class="w-12 h-12 rounded-full bg-blue-100 flex items-center justify-center shrink-0 text-blue-500">
-                            <i class="fa-solid fa-bed text-xl"></i>
+                    <!-- Body -->
+                    <div class="p-4">
+                        <!-- 住宿名稱（最重要，最大） -->
+                        <div class="flex items-start gap-3 mb-3">
+                            <div class="w-9 h-9 rounded-xl bg-blue-50 flex items-center justify-center shrink-0 text-blue-500 mt-0.5">
+                                <i class="fa-solid fa-bed"></i>
+                            </div>
+                            <div class="flex-1 min-w-0">
+                                <h4 class="font-bold text-gray-900 leading-snug">{{ nextStage.endAlbergue }}</h4>
+                                <p class="text-xs text-gray-500 mt-0.5">{{ nextStage.to }}</p>
+                            </div>
                         </div>
-                        <div class="flex-1 min-w-0">
-                            <h4 class="font-bold text-gray-800 text-sm">{{ nextStage.endAlbergue }}</h4>
-                            <p class="text-xs text-gray-500 mt-1">
-                                {{ nextStage.from }} <i class="fa-solid fa-arrow-right text-[10px] mx-1"></i> {{ nextStage.to }}
-                            </p>
-                            <p class="text-xs text-gray-400 mt-0.5">{{ nextStage.km > 0 ? nextStage.km + ' km' : '交通 / 休息日' }}</p>
+                        <!-- 路段 + km pills -->
+                        <div class="flex items-center gap-2 flex-wrap">
+                            <span class="inline-flex items-center gap-1 text-xs text-gray-600 bg-gray-100 px-2.5 py-1 rounded-full">
+                                <i class="fa-solid fa-route text-[10px]"></i>
+                                {{ nextStage.from }} → {{ nextStage.to }}
+                            </span>
+                            <span v-if="nextStage.km > 0" class="inline-flex items-center gap-1 text-xs font-semibold text-blue-700 bg-blue-50 px-2.5 py-1 rounded-full">
+                                <i class="fa-solid fa-person-walking text-[10px]"></i>
+                                {{ nextStage.km }} km
+                            </span>
+                            <span v-else class="inline-flex items-center gap-1 text-xs text-purple-700 bg-purple-50 px-2.5 py-1 rounded-full">
+                                <i class="fa-solid fa-train text-[10px]" v-if="nextStage.type === 'train' || nextStage.type === 'transport'"></i>
+                                <i class="fa-solid fa-mug-hot text-[10px]" v-else></i>
+                                {{ nextStage.type === 'train' ? '火車移動' : nextStage.type === 'transport' ? '交通日' : '休息日' }}
+                            </span>
                         </div>
+                        <!-- 備註預覽 -->
+                        <p v-if="nextStage.description" class="text-xs text-gray-500 mt-2.5 leading-relaxed line-clamp-2">{{ nextStage.description }}</p>
                     </div>
                 </div>
-                <div v-else-if="!nextStage" class="bg-white rounded-2xl p-5 shadow-sm border border-gray-100 flex items-center justify-center text-gray-400 text-sm">
-                    🎉 恭喜！您已完成所有行程。
+                <div v-else-if="!nextStage" class="bg-white rounded-2xl p-5 shadow-sm border border-gray-100 flex items-center justify-center gap-2 text-gray-500 text-sm">
+                    <i class="fa-solid fa-circle-check text-green-500"></i> 恭喜！所有行程已完成。
                 </div>
 
                 <!-- My Journey Logs (New Section) -->
