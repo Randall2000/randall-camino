@@ -583,10 +583,17 @@
 
                                         <!-- Foreground Content -->
                                         <div class="absolute inset-0 bg-white border border-gray-100 rounded-lg flex items-center px-3 gap-2 transition-transform duration-200 ease-out"
-                                             :style="getItemStyle(catName, idx)">
+                                             :style="getItemStyle(catName, idx)"
+                                             @touchstart="onLongPressStart($event, catName, idx)"
+                                             @touchend.passive="onLongPressCancel"
+                                             @touchmove.passive="onLongPressCancel"
+                                             @mousedown="onLongPressStart($event, catName, idx)"
+                                             @mouseup="onLongPressCancel"
+                                             @mouseleave="onLongPressCancel">
 
-                                            <!-- Checkbox Area -->
-                                            <div @click="toggleItem(catName, idx)" class="cursor-pointer shrink-0 p-1">
+                                            <!-- Checkbox Area（阻止長按冒泡） -->
+                                            <div @click="toggleItem(catName, idx)" @touchstart.stop @mousedown.stop
+                                                 class="cursor-pointer shrink-0 p-3 -m-1">
                                                 <div class="w-5 h-5 rounded-full border flex items-center justify-center transition-colors"
                                                      :class="item.checked ? 'bg-blue-500 border-blue-500 text-white' : 'border-gray-300 text-transparent'">
                                                     <i class="fa-solid fa-check text-xs"></i>
@@ -594,23 +601,17 @@
                                             </div>
 
                                             <!-- Content Area -->
-                                            <div class="flex-1 flex justify-between items-center cursor-pointer min-w-0" @click="toggleItem(catName, idx)">
+                                            <div class="flex-1 flex justify-between items-center min-w-0">
                                                 <span class="truncate" :class="{'text-gray-400 line-through': item.checked}">{{ item.name }}</span>
                                                 <span v-if="item.weight" class="text-xs text-gray-400 bg-gray-50 px-1.5 py-0.5 rounded ml-2 whitespace-nowrap shrink-0">{{ item.weight }}g</span>
                                             </div>
 
-                                            <!-- More Actions Button -->
-                                            <button class="shrink-0 w-7 h-7 flex items-center justify-center text-gray-300 hover:text-gray-500 active:text-gray-700 transition-colors"
-                                                    @click.stop="openItemActions(catName, idx)">
-                                                <i class="fa-solid fa-ellipsis-vertical text-sm"></i>
+                                            <!-- More Actions Button（阻止長按冒泡） -->
+                                            <button class="shrink-0 w-10 h-10 flex items-center justify-center text-gray-300 hover:text-gray-500 active:text-gray-600 transition-colors"
+                                                    @click.stop="openItemActions(catName, idx)"
+                                                    @touchstart.stop @mousedown.stop>
+                                                <i class="fa-solid fa-ellipsis-vertical"></i>
                                             </button>
-
-                                            <!-- Drag Handle -->
-                                            <div class="shrink-0 px-0.5 py-4 touch-none cursor-grab active:cursor-grabbing"
-                                                 @touchstart.stop="onDragStart($event, catName, idx)"
-                                                 @mousedown.stop="onDragStart($event, catName, idx)">
-                                                <i class="fa-solid fa-grip-lines text-gray-200 text-sm"></i>
-                                            </div>
                                         </div>
                                     </div>
                                 </template>
@@ -1368,15 +1369,26 @@
                     currentDeltaY: 0
                 });
 
-                const onDragStart = (e, catName, idx) => {
-                    e.stopPropagation();
-                    const startY = e.touches ? e.touches[0].clientY : e.clientY;
+                const startDrag = (catName, idx, startY) => {
                     dragSort.value = { active: true, category: catName, fromIndex: idx, toIndex: idx, startY, currentDeltaY: 0 };
                     swipeState.value.activeId = null;
                     window.addEventListener('touchmove', onDragMove, { passive: false });
                     window.addEventListener('touchend', onDragEnd);
                     window.addEventListener('mousemove', onDragMove);
                     window.addEventListener('mouseup', onDragEnd);
+                };
+
+                // 長按觸發拖曳（400ms）
+                let longPressTimer = null;
+                const onLongPressStart = (e, catName, idx) => {
+                    const startY = e.touches ? e.touches[0].clientY : e.clientY;
+                    longPressTimer = setTimeout(() => {
+                        longPressTimer = null;
+                        startDrag(catName, idx, startY);
+                    }, 400);
+                };
+                const onLongPressCancel = () => {
+                    if (longPressTimer) { clearTimeout(longPressTimer); longPressTimer = null; }
                 };
 
                 const onDragMove = (e) => {
@@ -1824,9 +1836,10 @@
                     handleTouchMove: onSwipeMove,
                     handleTouchEnd: onSwipeEnd,
                     isSwiping,
-                    // Drag to reorder
+                    // Drag to reorder (長按觸發)
                     dragSort,
-                    onDragStart,
+                    onLongPressStart,
+                    onLongPressCancel,
                     getItemStyle
                 };
             }
