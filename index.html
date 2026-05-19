@@ -582,7 +582,8 @@
                                          :class="dragSort.active && dragSort.category === catName && dragSort.fromIndex === idx ? 'z-[30]' : ''">
 
                                         <!-- Foreground Content -->
-                                        <div class="absolute inset-0 bg-white border border-gray-100 rounded-lg flex items-center px-3 gap-2 transition-transform duration-200 ease-out"
+                                        <div class="absolute inset-0 bg-white border border-gray-100 rounded-lg flex items-center px-3 gap-2"
+                                             :class="isReordering ? '' : 'transition-transform duration-150 ease-out'"
                                              :style="getItemStyle(catName, idx)"
                                              @touchstart="onLongPressStart($event, catName, idx)"
                                              @touchend.passive="onLongPressCancel"
@@ -1402,6 +1403,9 @@
                     dragSort.value.toIndex = newTo;
                 };
 
+                // 放手時暫停 transition，避免 key-by-index 造成的錯位動畫
+                const isReordering = ref(false);
+
                 const onDragEnd = () => {
                     if (!dragSort.value.active) return;
                     window.removeEventListener('touchmove', onDragMove);
@@ -1409,12 +1413,14 @@
                     window.removeEventListener('mousemove', onDragMove);
                     window.removeEventListener('mouseup', onDragEnd);
                     const { category, fromIndex, toIndex } = dragSort.value;
+                    isReordering.value = true;     // 關閉 transition
+                    dragSort.value.active = false; // 清除 transform
                     if (fromIndex !== toIndex) {
                         const items = packingList.value[category];
                         const [moved] = items.splice(fromIndex, 1);
                         items.splice(toIndex, 0, moved);
                     }
-                    dragSort.value.active = false;
+                    nextTick(() => { isReordering.value = false; }); // 下一幀恢復 transition
                 };
 
                 const getItemStyle = (catName, idx) => {
@@ -1838,6 +1844,7 @@
                     isSwiping,
                     // Drag to reorder (長按觸發)
                     dragSort,
+                    isReordering,
                     onLongPressStart,
                     onLongPressCancel,
                     getItemStyle
