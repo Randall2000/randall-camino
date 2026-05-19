@@ -1356,6 +1356,11 @@
                 // --- Drag-to-Reorder ---
                 const DRAG_ITEM_HEIGHT = 66; // 58px height + 8px gap
 
+                const getEventPoint = (e) => ({
+                    x: e.touches ? e.touches[0].clientX : e.clientX,
+                    y: e.touches ? e.touches[0].clientY : e.clientY,
+                });
+
                 const dragSort = ref({
                     active: false,
                     category: null,
@@ -1379,23 +1384,20 @@
                 let lpInfo = null; // { catName, idx, startX, startY }
 
                 const onLongPressStart = (e, catName, idx) => {
-                    const startX = e.touches ? e.touches[0].clientX : e.clientX;
-                    const startY = e.touches ? e.touches[0].clientY : e.clientY;
+                    const { x: startX, y: startY } = getEventPoint(e);
                     lpInfo = { catName, idx, startX, startY };
                     longPressTimer = setTimeout(() => {
                         longPressTimer = null;
                         lpInfo = null;
-                        openItemActions(catName, idx); // 靜止長按 → 顯示操作選單
+                        openItemActions(catName, idx);
                     }, 400);
                 };
 
                 const onLongPressMove = (e) => {
                     if (!lpInfo) return;
-                    const x = e.touches ? e.touches[0].clientX : e.clientX;
-                    const y = e.touches ? e.touches[0].clientY : e.clientY;
+                    const { x, y } = getEventPoint(e);
                     const moved = Math.abs(x - lpInfo.startX) > 6 || Math.abs(y - lpInfo.startY) > 6;
                     if (!moved) return;
-                    // 移動超過閾值 → 取消 action sheet，進入拖曳
                     if (longPressTimer) { clearTimeout(longPressTimer); longPressTimer = null; }
                     const { catName, idx, startY } = lpInfo;
                     lpInfo = null;
@@ -1410,7 +1412,7 @@
                 const onDragMove = (e) => {
                     if (!dragSort.value.active) return;
                     if (e.cancelable) e.preventDefault();
-                    const y = e.touches ? e.touches[0].clientY : e.clientY;
+                    const { y } = getEventPoint(e);
                     const deltaY = y - dragSort.value.startY;
                     dragSort.value.currentDeltaY = deltaY;
                     const items = packingList.value[dragSort.value.category];
@@ -1428,14 +1430,14 @@
                     window.removeEventListener('mousemove', onDragMove);
                     window.removeEventListener('mouseup', onDragEnd);
                     const { category, fromIndex, toIndex } = dragSort.value;
-                    isReordering.value = true;     // 關閉 transition
-                    dragSort.value.active = false; // 清除 transform
+                    dragSort.value.active = false;
                     if (fromIndex !== toIndex) {
+                        isReordering.value = true; // 暫停 transition，避免 key-by-index 錯位動畫
                         const items = packingList.value[category];
                         const [moved] = items.splice(fromIndex, 1);
                         items.splice(toIndex, 0, moved);
+                        nextTick(() => { isReordering.value = false; });
                     }
-                    nextTick(() => { isReordering.value = false; }); // 下一幀恢復 transition
                 };
 
                 const getItemStyle = (catName, idx) => {
@@ -1464,8 +1466,9 @@
                     }
 
                     interactingId.value = id;
-                    swipeState.value.startX = e.touches ? e.touches[0].clientX : e.clientX;
-                    swipeState.value.startY = e.touches ? e.touches[0].clientY : e.clientY;
+                    const { x: sx, y: sy } = getEventPoint(e);
+                    swipeState.value.startX = sx;
+                    swipeState.value.startY = sy;
                     swipeState.value.isDragging = true;
                     
                     swipeState.value.baseOffset = (swipeState.value.activeId === id) ? -120 : 0;
@@ -1477,8 +1480,7 @@
                 const onSwipeMove = (e) => {
                     if (!swipeState.value.isDragging || !interactingId.value) return;
 
-                    const x = e.touches ? e.touches[0].clientX : e.clientX;
-                    const y = e.touches ? e.touches[0].clientY : e.clientY;
+                    const { x, y } = getEventPoint(e);
                     const deltaX = x - swipeState.value.startX;
                     const deltaY = y - swipeState.value.startY;
 
