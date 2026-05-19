@@ -180,33 +180,27 @@
                     </div>
                 </div>
 
-                <!-- Next Stop Recommendation (Dynamic) -->
-                <div v-if="nextRecommendedAlbergue" class="bg-white rounded-2xl p-5 shadow-sm border border-gray-100 cursor-pointer hover:bg-gray-50 transition" @click="showPoiOnMap(nextRecommendedAlbergue)">
-                    <div class="flex justify-between items-center mb-2">
-                        <h3 class="font-bold text-gray-700">下一站推薦</h3>
-                        <span class="bg-green-100 text-green-700 text-xs px-2 py-1 rounded-full">
-                            {{ nextRecommendedAlbergue.category === 'Xunta' ? '公立 (Xunta)' : nextRecommendedAlbergue.category }}
-                        </span>
+                <!-- Next Stop: 今晚住宿 -->
+                <div v-if="nextStage && nextStage.endAlbergue" class="bg-white rounded-2xl p-5 shadow-sm border border-gray-100">
+                    <div class="flex justify-between items-center mb-3">
+                        <h3 class="font-bold text-gray-700">今晚住宿</h3>
+                        <span class="bg-blue-100 text-blue-700 text-xs px-2 py-1 rounded-full">Day {{ nextStage.day }} · {{ nextStage.date }}</span>
                     </div>
-                    <div class="flex gap-3">
-                        <div class="w-20 h-20 rounded-full bg-blue-100 flex items-center justify-center shrink-0 text-blue-500">
-                            <i class="fa-solid fa-bed text-3xl"></i>
+                    <div class="flex gap-3 items-center">
+                        <div class="w-12 h-12 rounded-full bg-blue-100 flex items-center justify-center shrink-0 text-blue-500">
+                            <i class="fa-solid fa-bed text-xl"></i>
                         </div>
                         <div class="flex-1 min-w-0">
-                            <h4 class="font-bold truncate text-gray-800">{{ nextRecommendedAlbergue.name }}</h4>
-                            <p class="text-xs text-gray-500 line-clamp-2 mt-1">{{ nextRecommendedAlbergue.description }}</p>
-                            <div class="mt-2 flex items-center gap-3 text-xs">
-                                <span class="text-yellow-500 font-medium"><i class="fa-solid fa-star"></i> 推薦</span>
-                                <span class="text-gray-300">|</span>
-                                <span class="text-blue-600 font-medium">{{ nextRecommendedAlbergue.price }}</span>
-                                <span class="text-gray-300">|</span>
-                                <span class="text-gray-500">{{ nextRecommendedAlbergue.beds }} 床</span>
-                            </div>
+                            <h4 class="font-bold text-gray-800 text-sm">{{ nextStage.endAlbergue }}</h4>
+                            <p class="text-xs text-gray-500 mt-1">
+                                {{ nextStage.from }} <i class="fa-solid fa-arrow-right text-[10px] mx-1"></i> {{ nextStage.to }}
+                            </p>
+                            <p class="text-xs text-gray-400 mt-0.5">{{ nextStage.km > 0 ? nextStage.km + ' km' : '交通 / 休息日' }}</p>
                         </div>
                     </div>
                 </div>
-                <div v-else class="bg-white rounded-2xl p-5 shadow-sm border border-gray-100 flex items-center justify-center text-gray-400 text-sm">
-                    恭喜！您已完成所有行程。
+                <div v-else-if="!nextStage" class="bg-white rounded-2xl p-5 shadow-sm border border-gray-100 flex items-center justify-center text-gray-400 text-sm">
+                    🎉 恭喜！您已完成所有行程。
                 </div>
 
                 <!-- My Journey Logs (New Section) -->
@@ -1032,14 +1026,12 @@
                     return (w / 1000).toFixed(2);
                 });
 
-                // 動態取得下一站推薦住宿
+                const nextStage = computed(() => stages.value.find(s => !s.completed));
+
+                // 保留供地圖 POI 功能使用
                 const nextRecommendedAlbergue = computed(() => {
-                    // 找出第一個尚未完成的階段
-                    const nextStage = stages.value.find(s => !s.completed);
-                    if (!nextStage || !nextStage.endAlbergue) return null;
-                    
-                    // 在 POI 列表中尋找匹配的庇護所
-                    return pois.find(p => p.name === nextStage.endAlbergue);
+                    if (!nextStage.value || !nextStage.value.endAlbergue) return null;
+                    return pois.find(p => p.name === nextStage.value.endAlbergue);
                 });
 
                 const currentStageName = computed(() => {
@@ -1573,6 +1565,7 @@
                     progressPercentage,
                     currentStageName,
                     estimatedDays,
+                    nextStage,
                     nextRecommendedAlbergue,
                     // Methods
                     setView,
