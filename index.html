@@ -577,33 +577,16 @@
                                         </button>
                                     </div>
 
-                                    <!-- Swipeable Item Container -->
+                                    <!-- Item Container -->
                                     <div v-else class="relative rounded-lg h-[58px] select-none"
-                                         :class="dragSort.active && dragSort.category === catName && dragSort.fromIndex === idx ? 'z-[30]' : 'overflow-hidden'">
-
-                                        <!-- Background Actions (Reveal on swipe) -->
-                                        <div class="absolute inset-y-0 right-0 flex w-[120px]">
-                                            <button @click="startEditing(catName, idx)" class="w-1/2 bg-gray-200 text-gray-600 flex items-center justify-center hover:bg-gray-300 transition active:bg-gray-400">
-                                                <i class="fa-solid fa-pen"></i>
-                                            </button>
-                                            <button @click="deleteItem(catName, idx)" class="w-1/2 bg-red-500 text-white flex items-center justify-center hover:bg-red-600 transition active:bg-red-700">
-                                                <i class="fa-solid fa-trash-can"></i>
-                                            </button>
-                                        </div>
+                                         :class="dragSort.active && dragSort.category === catName && dragSort.fromIndex === idx ? 'z-[30]' : ''">
 
                                         <!-- Foreground Content -->
-                                        <div class="absolute inset-0 bg-white border border-gray-100 rounded-lg flex items-center px-3 gap-3"
-                                             :style="getItemStyle(catName, idx)"
-                                             @touchstart="handleTouchStart($event, catName, idx)"
-                                             @touchmove="handleTouchMove($event)"
-                                             @touchend="handleTouchEnd($event)"
-                                             @mousedown="handleTouchStart($event, catName, idx)"
-                                             @mousemove="handleTouchMove($event)"
-                                             @mouseup="handleTouchEnd($event)"
-                                             @mouseleave="handleTouchEnd($event)">
+                                        <div class="absolute inset-0 bg-white border border-gray-100 rounded-lg flex items-center px-3 gap-2 transition-transform duration-200 ease-out"
+                                             :style="getItemStyle(catName, idx)">
 
                                             <!-- Checkbox Area -->
-                                            <div @click="!isSwiping && toggleItem(catName, idx)" class="cursor-pointer shrink-0 p-1">
+                                            <div @click="toggleItem(catName, idx)" class="cursor-pointer shrink-0 p-1">
                                                 <div class="w-5 h-5 rounded-full border flex items-center justify-center transition-colors"
                                                      :class="item.checked ? 'bg-blue-500 border-blue-500 text-white' : 'border-gray-300 text-transparent'">
                                                     <i class="fa-solid fa-check text-xs"></i>
@@ -611,16 +594,22 @@
                                             </div>
 
                                             <!-- Content Area -->
-                                            <div class="flex-1 flex justify-between items-center cursor-pointer" @click="!isSwiping && toggleItem(catName, idx)">
-                                                <span :class="{'text-gray-400 line-through': item.checked}">{{ item.name }}</span>
-                                                <span v-if="item.weight" class="text-xs text-gray-400 bg-gray-50 px-1.5 py-0.5 rounded ml-2 whitespace-nowrap">{{ item.weight }}g</span>
+                                            <div class="flex-1 flex justify-between items-center cursor-pointer min-w-0" @click="toggleItem(catName, idx)">
+                                                <span class="truncate" :class="{'text-gray-400 line-through': item.checked}">{{ item.name }}</span>
+                                                <span v-if="item.weight" class="text-xs text-gray-400 bg-gray-50 px-1.5 py-0.5 rounded ml-2 whitespace-nowrap shrink-0">{{ item.weight }}g</span>
                                             </div>
 
+                                            <!-- More Actions Button -->
+                                            <button class="shrink-0 w-7 h-7 flex items-center justify-center text-gray-300 hover:text-gray-500 active:text-gray-700 transition-colors"
+                                                    @click.stop="openItemActions(catName, idx)">
+                                                <i class="fa-solid fa-ellipsis-vertical text-sm"></i>
+                                            </button>
+
                                             <!-- Drag Handle -->
-                                            <div class="shrink-0 px-1.5 py-4 touch-none cursor-grab active:cursor-grabbing"
+                                            <div class="shrink-0 px-0.5 py-4 touch-none cursor-grab active:cursor-grabbing"
                                                  @touchstart.stop="onDragStart($event, catName, idx)"
                                                  @mousedown.stop="onDragStart($event, catName, idx)">
-                                                <i class="fa-solid fa-grip-lines text-gray-300 text-sm"></i>
+                                                <i class="fa-solid fa-grip-lines text-gray-200 text-sm"></i>
                                             </div>
                                         </div>
                                     </div>
@@ -718,6 +707,30 @@
         <transition name="fade">
             <div v-if="toastMsg" class="absolute bottom-24 left-1/2 transform -translate-x-1/2 bg-gray-800 text-white px-4 py-2.5 rounded-xl shadow-lg z-50 text-sm whitespace-nowrap">
                 {{ toastMsg }}
+            </div>
+        </transition>
+
+        <!-- 裝備項目操作 Sheet -->
+        <transition name="fade">
+            <div v-if="itemActionsSheet.visible" class="absolute inset-0 bg-black/40 z-[60] flex items-end justify-center" @click.self="closeItemActions">
+                <div class="bg-white w-full rounded-t-2xl overflow-hidden shadow-2xl">
+                    <div class="px-5 pt-4 pb-2">
+                        <p class="text-xs text-gray-400 font-medium truncate">{{ packingList[itemActionsSheet.category]?.[itemActionsSheet.index]?.name }}</p>
+                    </div>
+                    <button @click="doEditItem" class="w-full flex items-center gap-4 px-5 py-4 text-gray-800 hover:bg-gray-50 active:bg-gray-100 border-t border-gray-100 transition">
+                        <div class="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center">
+                            <i class="fa-solid fa-pen text-blue-600 text-sm"></i>
+                        </div>
+                        <span class="font-medium text-sm">編輯名稱 / 重量</span>
+                    </button>
+                    <button @click="doDeleteItem" class="w-full flex items-center gap-4 px-5 py-4 text-red-500 hover:bg-red-50 active:bg-red-100 border-t border-gray-100 transition">
+                        <div class="w-8 h-8 rounded-full bg-red-100 flex items-center justify-center">
+                            <i class="fa-solid fa-trash-can text-red-500 text-sm"></i>
+                        </div>
+                        <span class="font-medium text-sm">刪除此項目</span>
+                    </button>
+                    <button @click="closeItemActions" class="w-full py-4 text-gray-400 font-medium text-sm border-t border-gray-100 hover:bg-gray-50 active:bg-gray-100 transition">取消</button>
+                </div>
             </div>
         </transition>
 
@@ -1265,6 +1278,24 @@
                     }
                 };
 
+                // 裝備項目操作 Sheet
+                const itemActionsSheet = ref({ visible: false, category: null, index: null });
+                const openItemActions = (cat, idx) => {
+                    itemActionsSheet.value = { visible: true, category: cat, index: idx };
+                };
+                const closeItemActions = () => { itemActionsSheet.value.visible = false; };
+                const doEditItem = () => {
+                    const { category, index } = itemActionsSheet.value;
+                    closeItemActions();
+                    startEditing(category, index);
+                };
+                const doDeleteItem = () => {
+                    const { category, index } = itemActionsSheet.value;
+                    const name = packingList.value[category]?.[index]?.name || '此項目';
+                    closeItemActions();
+                    showConfirm('刪除裝備', `確定刪除「${name}」嗎？`, () => deleteItem(category, index));
+                };
+
                 // 自訂確認對話框
                 const confirmDialog = ref({ visible: false, title: '', message: '', onConfirm: null });
                 const showConfirm = (title, message, onConfirm) => {
@@ -1375,20 +1406,18 @@
                 };
 
                 const getItemStyle = (catName, idx) => {
-                    if (dragSort.value.active && dragSort.value.category === catName) {
-                        const { fromIndex, toIndex, currentDeltaY } = dragSort.value;
-                        if (idx === fromIndex) {
-                            return { transform: `translateY(${currentDeltaY}px)`, zIndex: 30, transition: 'none', boxShadow: '0 8px 24px rgba(0,0,0,0.15)', borderColor: '#bfdbfe', background: '#eff6ff' };
-                        }
-                        if (fromIndex < toIndex && idx > fromIndex && idx <= toIndex) {
-                            return { transform: `translateY(-${DRAG_ITEM_HEIGHT}px)`, transition: 'transform 0.15s ease' };
-                        }
-                        if (fromIndex > toIndex && idx >= toIndex && idx < fromIndex) {
-                            return { transform: `translateY(${DRAG_ITEM_HEIGHT}px)`, transition: 'transform 0.15s ease' };
-                        }
-                        return { transition: 'transform 0.15s ease' };
+                    if (!dragSort.value.active || dragSort.value.category !== catName) return {};
+                    const { fromIndex, toIndex, currentDeltaY } = dragSort.value;
+                    if (idx === fromIndex) {
+                        return { transform: `translateY(${currentDeltaY}px)`, zIndex: 30, transition: 'none', boxShadow: '0 8px 24px rgba(0,0,0,0.15)', borderColor: '#bfdbfe', background: '#eff6ff' };
                     }
-                    return getStyle(catName, idx);
+                    if (fromIndex < toIndex && idx > fromIndex && idx <= toIndex) {
+                        return { transform: `translateY(-${DRAG_ITEM_HEIGHT}px)`, transition: 'transform 0.15s ease' };
+                    }
+                    if (fromIndex > toIndex && idx >= toIndex && idx < fromIndex) {
+                        return { transform: `translateY(${DRAG_ITEM_HEIGHT}px)`, transition: 'transform 0.15s ease' };
+                    }
+                    return {};
                 };
 
                 // --- Swipe Handlers ---
@@ -1778,6 +1807,11 @@
                     clearLogs,
                     deleteLog,
                     editLogNote,
+                    itemActionsSheet,
+                    openItemActions,
+                    closeItemActions,
+                    doEditItem,
+                    doDeleteItem,
                     confirmDialog,
                     doConfirm,
                     cancelConfirm,
