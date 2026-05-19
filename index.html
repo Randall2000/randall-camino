@@ -556,8 +556,14 @@
                         </div>
 
                         <div v-for="(category, catName) in packingList" :key="catName" class="mb-6">
-                            <h3 class="font-bold text-gray-800 mb-2 flex items-center gap-2 capitalize">
-                                <i class="fa-solid fa-caret-right text-yellow-500"></i> {{ catName }}
+                            <h3 class="font-bold text-gray-800 mb-2 flex items-center justify-between capitalize">
+                                <span class="flex items-center gap-2">
+                                    <i class="fa-solid fa-caret-right text-yellow-500"></i> {{ catName }}
+                                </span>
+                                <button @click="toggleEditMode(catName)"
+                                        class="text-sm font-normal text-blue-500 active:text-blue-700 px-2 py-1 rounded-lg active:bg-blue-50 transition-colors">
+                                    {{ editModeCategory === catName ? '完成' : '編輯' }}
+                                </button>
                             </h3>
                             <div class="space-y-2">
                                 <!-- List Items Wrapper -->
@@ -581,19 +587,39 @@
                                     <div v-else class="relative rounded-lg h-[58px] select-none"
                                          :class="dragSort.active && dragSort.category === catName && dragSort.fromIndex === idx ? 'z-[30]' : ''">
 
-                                        <!-- Foreground Content -->
-                                        <div class="absolute inset-0 bg-white border border-gray-100 rounded-lg flex items-center px-3 gap-2"
+                                        <!-- Edit Mode -->
+                                        <div v-if="editModeCategory === catName"
+                                             class="absolute inset-0 bg-white border border-gray-100 rounded-lg flex items-center"
                                              :class="isReordering ? '' : 'transition-transform duration-150 ease-out'"
-                                             :style="getItemStyle(catName, idx)"
-                                             @touchstart="onLongPressStart($event, catName, idx)"
-                                             @touchend.passive="onLongPressCancel"
-                                             @touchmove="onLongPressMove"
-                                             @mousedown="onLongPressStart($event, catName, idx)"
-                                             @mouseup="onLongPressCancel"
-                                             @mouseleave="onLongPressCancel">
+                                             :style="getItemStyle(catName, idx)">
 
-                                            <!-- Checkbox Area（阻止長按冒泡） -->
-                                            <div @click="toggleItem(catName, idx)" @touchstart.stop @mousedown.stop
+                                            <!-- Delete Button -->
+                                            <button @click="deleteItemDirect(catName, idx)"
+                                                    class="shrink-0 w-11 h-11 flex items-center justify-center text-red-500 active:opacity-60 ml-1">
+                                                <i class="fa-solid fa-circle-minus text-xl"></i>
+                                            </button>
+
+                                            <!-- Content (tap to edit) -->
+                                            <div @click="startEditing(catName, idx)"
+                                                 class="flex-1 flex justify-between items-center min-w-0 px-2 cursor-pointer h-full">
+                                                <span class="truncate text-gray-800">{{ item.name }}</span>
+                                                <span v-if="item.weight" class="text-xs text-gray-400 bg-gray-50 px-1.5 py-0.5 rounded ml-2 whitespace-nowrap shrink-0">{{ item.weight }}g</span>
+                                            </div>
+
+                                            <!-- Drag Handle -->
+                                            <div class="shrink-0 w-11 h-11 flex items-center justify-center text-gray-300 touch-none cursor-grab active:cursor-grabbing mr-1"
+                                                 @touchstart.stop.prevent="startDragFromHandle($event, catName, idx)"
+                                                 @mousedown.stop="startDragFromHandle($event, catName, idx)">
+                                                <i class="fa-solid fa-grip-lines text-base"></i>
+                                            </div>
+                                        </div>
+
+                                        <!-- Normal Mode -->
+                                        <div v-else
+                                             class="absolute inset-0 bg-white border border-gray-100 rounded-lg flex items-center px-3 gap-2 transition-transform duration-150 ease-out">
+
+                                            <!-- Checkbox -->
+                                            <div @click="toggleItem(catName, idx)"
                                                  class="cursor-pointer shrink-0 p-3 -m-1">
                                                 <div class="w-5 h-5 rounded-full border flex items-center justify-center transition-colors"
                                                      :class="item.checked ? 'bg-blue-500 border-blue-500 text-white' : 'border-gray-300 text-transparent'">
@@ -601,13 +627,11 @@
                                                 </div>
                                             </div>
 
-                                            <!-- Content Area -->
+                                            <!-- Content -->
                                             <div class="flex-1 flex justify-between items-center min-w-0">
                                                 <span class="truncate" :class="{'text-gray-400 line-through': item.checked}">{{ item.name }}</span>
                                                 <span v-if="item.weight" class="text-xs text-gray-400 bg-gray-50 px-1.5 py-0.5 rounded ml-2 whitespace-nowrap shrink-0">{{ item.weight }}g</span>
                                             </div>
-
-
                                         </div>
                                     </div>
                                 </template>
@@ -707,30 +731,6 @@
             </div>
         </transition>
 
-        <!-- 裝備項目操作 Sheet -->
-        <transition name="fade">
-            <div v-if="itemActionsSheet.visible" class="absolute inset-0 bg-black/40 z-[60] flex items-end justify-center" @click.self="closeItemActions">
-                <div class="bg-white w-full rounded-t-2xl overflow-hidden shadow-2xl">
-                    <div class="px-5 pt-4 pb-2">
-                        <p class="text-xs text-gray-400 font-medium truncate">{{ packingList[itemActionsSheet.category]?.[itemActionsSheet.index]?.name }}</p>
-                    </div>
-                    <button @click="doEditItem" class="w-full flex items-center gap-4 px-5 py-4 text-gray-800 hover:bg-gray-50 active:bg-gray-100 border-t border-gray-100 transition">
-                        <div class="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center">
-                            <i class="fa-solid fa-pen text-blue-600 text-sm"></i>
-                        </div>
-                        <span class="font-medium text-sm">編輯名稱 / 重量</span>
-                    </button>
-                    <button @click="doDeleteItem" class="w-full flex items-center gap-4 px-5 py-4 text-red-500 hover:bg-red-50 active:bg-red-100 border-t border-gray-100 transition">
-                        <div class="w-8 h-8 rounded-full bg-red-100 flex items-center justify-center">
-                            <i class="fa-solid fa-trash-can text-red-500 text-sm"></i>
-                        </div>
-                        <span class="font-medium text-sm">刪除此項目</span>
-                    </button>
-                    <button @click="closeItemActions" class="w-full py-4 text-gray-400 font-medium text-sm border-t border-gray-100 hover:bg-gray-50 active:bg-gray-100 transition">取消</button>
-                </div>
-            </div>
-        </transition>
-
         <!-- 自訂確認對話框 -->
         <transition name="fade">
             <div v-if="confirmDialog.visible" class="absolute inset-0 bg-black/40 z-[60] flex items-end justify-center" @click.self="cancelConfirm">
@@ -796,17 +796,13 @@
                 const editForm = ref({ name: '', weight: 0 });
                 const editInput = ref(null);
 
-                // Swipe Logic State
-                const swipeState = ref({
-                    activeId: null, // format: "category-index"
-                    startX: 0,
-                    startY: 0,
-                    currentOffset: 0,
-                    baseOffset: 0,
-                    isDragging: false
-                });
-                const isSwiping = ref(false); 
-                const interactingId = ref(null); 
+                const editModeCategory = ref(null);
+                const toggleEditMode = (catName) => {
+                    editModeCategory.value = editModeCategory.value === catName ? null : catName;
+                    if (editingState.value.category === catName) {
+                        editingState.value = { category: null, index: null };
+                    }
+                };
 
                 // 地圖相關
                 let map = null;
@@ -1276,22 +1272,6 @@
                 };
 
                 // 裝備項目操作 Sheet
-                const itemActionsSheet = ref({ visible: false, category: null, index: null });
-                const openItemActions = (cat, idx) => {
-                    itemActionsSheet.value = { visible: true, category: cat, index: idx };
-                };
-                const closeItemActions = () => { itemActionsSheet.value.visible = false; };
-                const doEditItem = () => {
-                    const { category, index } = itemActionsSheet.value;
-                    closeItemActions();
-                    startEditing(category, index);
-                };
-                const doDeleteItem = () => {
-                    const { category, index } = itemActionsSheet.value;
-                    const name = packingList.value[category]?.[index]?.name || '此項目';
-                    closeItemActions();
-                    showConfirm('刪除裝備', `確定刪除「${name}」嗎？`, () => deleteItem(category, index));
-                };
 
                 // 自訂確認對話框
                 const confirmDialog = ref({ visible: false, title: '', message: '', onConfirm: null });
@@ -1372,41 +1352,23 @@
 
                 const startDrag = (catName, idx, startY) => {
                     dragSort.value = { active: true, category: catName, fromIndex: idx, toIndex: idx, startY, currentDeltaY: 0 };
-                    swipeState.value.activeId = null;
                     window.addEventListener('touchmove', onDragMove, { passive: false });
                     window.addEventListener('touchend', onDragEnd);
                     window.addEventListener('mousemove', onDragMove);
                     window.addEventListener('mouseup', onDragEnd);
                 };
 
-                // 長按邏輯：靜止 400ms → action sheet；按住移動 → 拖曳
-                let longPressTimer = null;
-                let lpInfo = null; // { catName, idx, startX, startY }
-
-                const onLongPressStart = (e, catName, idx) => {
-                    const { x: startX, y: startY } = getEventPoint(e);
-                    lpInfo = { catName, idx, startX, startY };
-                    longPressTimer = setTimeout(() => {
-                        longPressTimer = null;
-                        lpInfo = null;
-                        openItemActions(catName, idx);
-                    }, 400);
+                const startDragFromHandle = (e, catName, idx) => {
+                    const { y } = getEventPoint(e);
+                    startDrag(catName, idx, y);
                 };
 
-                const onLongPressMove = (e) => {
-                    if (!lpInfo) return;
-                    const { x, y } = getEventPoint(e);
-                    const moved = Math.abs(x - lpInfo.startX) > 6 || Math.abs(y - lpInfo.startY) > 6;
-                    if (!moved) return;
-                    if (longPressTimer) { clearTimeout(longPressTimer); longPressTimer = null; }
-                    const { catName, idx, startY } = lpInfo;
-                    lpInfo = null;
-                    startDrag(catName, idx, startY);
-                };
-
-                const onLongPressCancel = () => {
-                    if (longPressTimer) { clearTimeout(longPressTimer); longPressTimer = null; }
-                    lpInfo = null;
+                const deleteItemDirect = (catName, idx) => {
+                    const name = packingList.value[catName]?.[idx]?.name || '此項目';
+                    showConfirm('刪除裝備', `確定刪除「${name}」嗎？`, () => {
+                        packingList.value[catName].splice(idx, 1);
+                        saveState();
+                    });
                 };
 
                 const onDragMove = (e) => {
@@ -1455,75 +1417,6 @@
                     return {};
                 };
 
-                // --- Swipe Handlers ---
-                const onSwipeStart = (e, category, index) => {
-                    const id = `${category}-${index}`;
-                    
-                    if (swipeState.value.activeId && swipeState.value.activeId !== id) {
-                        swipeState.value.activeId = null;
-                        swipeState.value.isDragging = false;
-                        return;
-                    }
-
-                    interactingId.value = id;
-                    const { x: sx, y: sy } = getEventPoint(e);
-                    swipeState.value.startX = sx;
-                    swipeState.value.startY = sy;
-                    swipeState.value.isDragging = true;
-                    
-                    swipeState.value.baseOffset = (swipeState.value.activeId === id) ? -120 : 0;
-                    swipeState.value.currentOffset = swipeState.value.baseOffset;
-                    
-                    isSwiping.value = false;
-                };
-
-                const onSwipeMove = (e) => {
-                    if (!swipeState.value.isDragging || !interactingId.value) return;
-
-                    const { x, y } = getEventPoint(e);
-                    const deltaX = x - swipeState.value.startX;
-                    const deltaY = y - swipeState.value.startY;
-
-                    if (Math.abs(deltaX) > Math.abs(deltaY) && Math.abs(deltaX) > 10) {
-                        if (e.cancelable && e.type === 'touchmove') e.preventDefault();
-                        isSwiping.value = true;
-                        swipeState.value.activeId = interactingId.value;
-                        
-                        let newOffset = swipeState.value.baseOffset + deltaX;
-                        swipeState.value.currentOffset = Math.min(0, Math.max(-140, newOffset));
-                    }
-                };
-
-                const onSwipeEnd = (e) => {
-                    if (!swipeState.value.isDragging || !interactingId.value) return;
-                    
-                    swipeState.value.isDragging = false;
-                    
-                    if (swipeState.value.currentOffset < -50) {
-                        swipeState.value.activeId = interactingId.value;
-                    } else {
-                        swipeState.value.activeId = null;
-                    }
-                    
-                    interactingId.value = null;
-                };
-
-                const getStyle = (category, index) => {
-                    const id = `${category}-${index}`;
-                    let x = 0;
-                    
-                    if (swipeState.value.activeId === id) {
-                        if (swipeState.value.isDragging && interactingId.value === id) {
-                            x = swipeState.value.currentOffset;
-                        } else {
-                            x = -120; // Open state
-                        }
-                    } else {
-                        x = 0; // Closed state
-                    }
-                    
-                    return { transform: `translateX(${x}px)` };
-                };
 
                 // 新增項目功能
                 const addItem = (category) => {
@@ -1538,12 +1431,10 @@
                     input.weight = null;
                 };
 
-                // 開始編輯
                 const startEditing = (category, index) => {
                     const item = packingList.value[category][index];
                     editingState.value = { category, index };
                     editForm.value = { name: item.name, weight: item.weight || 0 };
-                    swipeState.value.activeId = null;
                 };
 
                 // 儲存編輯
@@ -1555,10 +1446,9 @@
                     editingState.value = { category: null, index: null };
                 };
 
-                // 刪除項目功能
                 const deleteItem = (category, index) => {
                     packingList.value[category].splice(index, 1);
-                    swipeState.value.activeId = null; 
+                    saveState();
                 };
 
                 const showSyncStatus = () => {
@@ -1842,11 +1732,6 @@
                     clearLogs,
                     deleteLog,
                     editLogNote,
-                    itemActionsSheet,
-                    openItemActions,
-                    closeItemActions,
-                    doEditItem,
-                    doDeleteItem,
                     confirmDialog,
                     doConfirm,
                     cancelConfirm,
@@ -1854,17 +1739,14 @@
                     saveEditSheet,
                     cancelEditSheet,
                     openGoogleMaps, 
-                    // Swipe
-                    handleTouchStart: onSwipeStart,
-                    handleTouchMove: onSwipeMove,
-                    handleTouchEnd: onSwipeEnd,
-                    isSwiping,
-                    // Drag to reorder (長按觸發)
+                    // Packing list edit mode
+                    editModeCategory,
+                    toggleEditMode,
+                    deleteItemDirect,
+                    startDragFromHandle,
+                    // Drag to reorder
                     dragSort,
                     isReordering,
-                    onLongPressStart,
-                    onLongPressMove,
-                    onLongPressCancel,
                     getItemStyle
                 };
             }
