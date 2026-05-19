@@ -587,7 +587,7 @@
                                              :style="getItemStyle(catName, idx)"
                                              @touchstart="onLongPressStart($event, catName, idx)"
                                              @touchend.passive="onLongPressCancel"
-                                             @touchmove.passive="onLongPressCancel"
+                                             @touchmove="onLongPressMove"
                                              @mousedown="onLongPressStart($event, catName, idx)"
                                              @mouseup="onLongPressCancel"
                                              @mouseleave="onLongPressCancel">
@@ -607,12 +607,7 @@
                                                 <span v-if="item.weight" class="text-xs text-gray-400 bg-gray-50 px-1.5 py-0.5 rounded ml-2 whitespace-nowrap shrink-0">{{ item.weight }}g</span>
                                             </div>
 
-                                            <!-- More Actions Button（阻止長按冒泡） -->
-                                            <button class="shrink-0 w-10 h-10 flex items-center justify-center text-gray-300 hover:text-gray-500 active:text-gray-600 transition-colors"
-                                                    @click.stop="openItemActions(catName, idx)"
-                                                    @touchstart.stop @mousedown.stop>
-                                                <i class="fa-solid fa-ellipsis-vertical"></i>
-                                            </button>
+
                                         </div>
                                     </div>
                                 </template>
@@ -1379,17 +1374,37 @@
                     window.addEventListener('mouseup', onDragEnd);
                 };
 
-                // 長按觸發拖曳（400ms）
+                // 長按邏輯：靜止 400ms → action sheet；按住移動 → 拖曳
                 let longPressTimer = null;
+                let lpInfo = null; // { catName, idx, startX, startY }
+
                 const onLongPressStart = (e, catName, idx) => {
+                    const startX = e.touches ? e.touches[0].clientX : e.clientX;
                     const startY = e.touches ? e.touches[0].clientY : e.clientY;
+                    lpInfo = { catName, idx, startX, startY };
                     longPressTimer = setTimeout(() => {
                         longPressTimer = null;
-                        startDrag(catName, idx, startY);
+                        lpInfo = null;
+                        openItemActions(catName, idx); // 靜止長按 → 顯示操作選單
                     }, 400);
                 };
+
+                const onLongPressMove = (e) => {
+                    if (!lpInfo) return;
+                    const x = e.touches ? e.touches[0].clientX : e.clientX;
+                    const y = e.touches ? e.touches[0].clientY : e.clientY;
+                    const moved = Math.abs(x - lpInfo.startX) > 6 || Math.abs(y - lpInfo.startY) > 6;
+                    if (!moved) return;
+                    // 移動超過閾值 → 取消 action sheet，進入拖曳
+                    if (longPressTimer) { clearTimeout(longPressTimer); longPressTimer = null; }
+                    const { catName, idx, startY } = lpInfo;
+                    lpInfo = null;
+                    startDrag(catName, idx, startY);
+                };
+
                 const onLongPressCancel = () => {
                     if (longPressTimer) { clearTimeout(longPressTimer); longPressTimer = null; }
+                    lpInfo = null;
                 };
 
                 const onDragMove = (e) => {
@@ -1846,6 +1861,7 @@
                     dragSort,
                     isReordering,
                     onLongPressStart,
+                    onLongPressMove,
                     onLongPressCancel,
                     getItemStyle
                 };
