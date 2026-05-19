@@ -578,8 +578,9 @@
                                     </div>
 
                                     <!-- Swipeable Item Container -->
-                                    <div v-else class="relative overflow-hidden rounded-lg h-[58px] select-none">
-                                        
+                                    <div v-else class="relative rounded-lg h-[58px] select-none"
+                                         :class="dragSort.active && dragSort.category === catName && dragSort.fromIndex === idx ? 'z-[30]' : 'overflow-hidden'">
+
                                         <!-- Background Actions (Reveal on swipe) -->
                                         <div class="absolute inset-y-0 right-0 flex w-[120px]">
                                             <button @click="startEditing(catName, idx)" class="w-1/2 bg-gray-200 text-gray-600 flex items-center justify-center hover:bg-gray-300 transition active:bg-gray-400">
@@ -590,17 +591,17 @@
                                             </button>
                                         </div>
 
-                                        <!-- Foreground Content (Draggable) -->
-                                        <div class="absolute inset-0 bg-white border border-gray-100 flex items-center px-3 gap-3 transition-transform duration-200 ease-out"
-                                             :style="getSwipeStyle(catName, idx)"
+                                        <!-- Foreground Content -->
+                                        <div class="absolute inset-0 bg-white border border-gray-100 rounded-lg flex items-center px-3 gap-3"
+                                             :style="getItemStyle(catName, idx)"
                                              @touchstart="handleTouchStart($event, catName, idx)"
                                              @touchmove="handleTouchMove($event)"
                                              @touchend="handleTouchEnd($event)"
-                                             @mousedown="handleTouchStart($event, catName, idx)" 
+                                             @mousedown="handleTouchStart($event, catName, idx)"
                                              @mousemove="handleTouchMove($event)"
                                              @mouseup="handleTouchEnd($event)"
                                              @mouseleave="handleTouchEnd($event)">
-                                            
+
                                             <!-- Checkbox Area -->
                                             <div @click="!isSwiping && toggleItem(catName, idx)" class="cursor-pointer shrink-0 p-1">
                                                 <div class="w-5 h-5 rounded-full border flex items-center justify-center transition-colors"
@@ -614,9 +615,13 @@
                                                 <span :class="{'text-gray-400 line-through': item.checked}">{{ item.name }}</span>
                                                 <span v-if="item.weight" class="text-xs text-gray-400 bg-gray-50 px-1.5 py-0.5 rounded ml-2 whitespace-nowrap">{{ item.weight }}g</span>
                                             </div>
-                                            
-                                            <!-- Visual hint for swipe (optional) -->
-                                            <div class="w-1 h-8 bg-gray-100 rounded-full mx-1 opacity-50"></div>
+
+                                            <!-- Drag Handle -->
+                                            <div class="shrink-0 px-1.5 py-4 touch-none cursor-grab active:cursor-grabbing"
+                                                 @touchstart.stop="onDragStart($event, catName, idx)"
+                                                 @mousedown.stop="onDragStart($event, catName, idx)">
+                                                <i class="fa-solid fa-grip-lines text-gray-300 text-sm"></i>
+                                            </div>
                                         </div>
                                     </div>
                                 </template>
@@ -1320,6 +1325,72 @@
                     packingList.value[cat][idx].checked = !packingList.value[cat][idx].checked;
                 };
 
+                // --- Drag-to-Reorder ---
+                const DRAG_ITEM_HEIGHT = 66; // 58px height + 8px gap
+
+                const dragSort = ref({
+                    active: false,
+                    category: null,
+                    fromIndex: null,
+                    toIndex: null,
+                    startY: 0,
+                    currentDeltaY: 0
+                });
+
+                const onDragStart = (e, catName, idx) => {
+                    e.stopPropagation();
+                    const startY = e.touches ? e.touches[0].clientY : e.clientY;
+                    dragSort.value = { active: true, category: catName, fromIndex: idx, toIndex: idx, startY, currentDeltaY: 0 };
+                    swipeState.value.activeId = null;
+                    window.addEventListener('touchmove', onDragMove, { passive: false });
+                    window.addEventListener('touchend', onDragEnd);
+                    window.addEventListener('mousemove', onDragMove);
+                    window.addEventListener('mouseup', onDragEnd);
+                };
+
+                const onDragMove = (e) => {
+                    if (!dragSort.value.active) return;
+                    if (e.cancelable) e.preventDefault();
+                    const y = e.touches ? e.touches[0].clientY : e.clientY;
+                    const deltaY = y - dragSort.value.startY;
+                    dragSort.value.currentDeltaY = deltaY;
+                    const items = packingList.value[dragSort.value.category];
+                    const newTo = Math.max(0, Math.min(items.length - 1, dragSort.value.fromIndex + Math.round(deltaY / DRAG_ITEM_HEIGHT)));
+                    dragSort.value.toIndex = newTo;
+                };
+
+                const onDragEnd = () => {
+                    if (!dragSort.value.active) return;
+                    window.removeEventListener('touchmove', onDragMove);
+                    window.removeEventListener('touchend', onDragEnd);
+                    window.removeEventListener('mousemove', onDragMove);
+                    window.removeEventListener('mouseup', onDragEnd);
+                    const { category, fromIndex, toIndex } = dragSort.value;
+                    if (fromIndex !== toIndex) {
+                        const items = packingList.value[category];
+                        const [moved] = items.splice(fromIndex, 1);
+                        items.splice(toIndex, 0, moved);
+                    }
+                    dragSort.value.active = false;
+                };
+
+                const getItemStyle = (catName, idx) => {
+                    if (dragSort.value.active && dragSort.value.category === catName) {
+                        const { fromIndex, toIndex, currentDeltaY } = dragSort.value;
+                        if (idx === fromIndex) {
+                            return { transform: `translateY(${currentDeltaY}px)`, zIndex: 30, transition: 'none', boxShadow: '0 8px 24px rgba(0,0,0,0.15)', borderColor: '#bfdbfe', background: '#eff6ff' };
+                        }
+                        if (fromIndex < toIndex && idx > fromIndex && idx <= toIndex) {
+                            return { transform: `translateY(-${DRAG_ITEM_HEIGHT}px)`, transition: 'transform 0.15s ease' };
+                        }
+                        if (fromIndex > toIndex && idx >= toIndex && idx < fromIndex) {
+                            return { transform: `translateY(${DRAG_ITEM_HEIGHT}px)`, transition: 'transform 0.15s ease' };
+                        }
+                        return { transition: 'transform 0.15s ease' };
+                    }
+                    return getStyle(catName, idx);
+                };
+
                 // --- Swipe Handlers ---
                 const onSwipeStart = (e, category, index) => {
                     const id = `${category}-${index}`;
@@ -1718,8 +1789,11 @@
                     handleTouchStart: onSwipeStart,
                     handleTouchMove: onSwipeMove,
                     handleTouchEnd: onSwipeEnd,
-                    getSwipeStyle: getStyle,
-                    isSwiping
+                    isSwiping,
+                    // Drag to reorder
+                    dragSort,
+                    onDragStart,
+                    getItemStyle
                 };
             }
         }).mount('#app');
