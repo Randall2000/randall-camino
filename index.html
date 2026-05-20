@@ -107,8 +107,8 @@
                 <div class="flex gap-2">
                     <input
                         v-model="authEmail"
-                        type="email"
-                        placeholder="Email"
+                        type="text"
+                        placeholder="帳號"
                         class="flex-1 text-sm border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:border-blue-400"
                     />
                     <input
@@ -1532,11 +1532,14 @@
                     });
                 };
 
+                const ACCOUNT_MAP = { 'randall': 'randallhs@staff.ruten.com.tw' };
+
                 const signIn = async () => {
                     if (!authEmail.value || !authPassword.value) return;
+                    const email = ACCOUNT_MAP[authEmail.value.toLowerCase()] || authEmail.value;
                     authLoading.value = true;
                     const { error } = await supabaseClient.auth.signInWithPassword({
-                        email: authEmail.value,
+                        email,
                         password: authPassword.value
                     });
                     authLoading.value = false;
