@@ -104,22 +104,27 @@
             </div>
             <!-- 未登入 -->
             <div v-else class="flex flex-col gap-2">
-                <p class="text-xs text-gray-500">輸入 Email 取得無密碼登入連結</p>
                 <div class="flex gap-2">
                     <input
                         v-model="authEmail"
                         type="email"
-                        placeholder="your@email.com"
-                        @keyup.enter="sendMagicLink"
+                        placeholder="Email"
                         class="flex-1 text-sm border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:border-blue-400"
                     />
+                    <input
+                        v-model="authPassword"
+                        type="password"
+                        placeholder="密碼"
+                        @keyup.enter="signIn"
+                        class="w-28 text-sm border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:border-blue-400"
+                    />
                     <button
-                        @click="sendMagicLink"
-                        :disabled="authLoading || !authEmail"
+                        @click="signIn"
+                        :disabled="authLoading || !authEmail || !authPassword"
                         class="text-sm bg-blue-600 text-white px-4 py-2 rounded-lg disabled:opacity-40 hover:bg-blue-700 transition"
                     >
                         <span v-if="authLoading">⏳</span>
-                        <span v-else>寄出</span>
+                        <span v-else>登入</span>
                     </button>
                 </div>
             </div>
@@ -825,6 +830,7 @@
                 // Auth 狀態
                 const currentUser = ref(null);
                 const authEmail = ref('');
+                const authPassword = ref('');
                 const authLoading = ref(false);
                 const showAuthPanel = ref(false);
 
@@ -1526,20 +1532,21 @@
                     });
                 };
 
-                const sendMagicLink = async () => {
-                    if (!authEmail.value) return;
+                const signIn = async () => {
+                    if (!authEmail.value || !authPassword.value) return;
                     authLoading.value = true;
-                    const { error } = await supabaseClient.auth.signInWithOtp({
+                    const { error } = await supabaseClient.auth.signInWithPassword({
                         email: authEmail.value,
-                        options: { shouldCreateUser: true }
+                        password: authPassword.value
                     });
                     authLoading.value = false;
                     if (error) {
-                        showToast('⚠️ 寄送失敗：' + error.message);
+                        showToast('⚠️ 帳號或密碼錯誤');
                     } else {
-                        showToast('📧 登入連結已寄出，請查收信件');
                         authEmail.value = '';
+                        authPassword.value = '';
                         showAuthPanel.value = false;
+                        showToast('✅ 登入成功');
                     }
                 };
 
@@ -1846,9 +1853,10 @@
                     // Auth
                     currentUser,
                     authEmail,
+                    authPassword,
                     authLoading,
                     showAuthPanel,
-                    sendMagicLink,
+                    signIn,
                     signOut
                 };
             }
