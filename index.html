@@ -21,6 +21,9 @@
     <!-- Google Fonts -->
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 
+    <!-- Supabase -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
     <style>
         body {
             font-family: 'Inter', sans-serif;
@@ -81,10 +84,46 @@
                     <p class="text-xs text-blue-100">{{ currentStageName || '準備出發' }}</p>
                 </div>
             </div>
-            <button @click="showSyncStatus" class="text-white hover:text-yellow-300 transition">
-                <i class="fa-solid fa-cloud-arrow-down"></i>
+            <button @click="showSyncStatus" class="flex items-center gap-1.5 text-white hover:text-yellow-300 transition">
+                <i v-if="currentUser" class="fa-solid fa-circle-user text-xl text-green-300"></i>
+                <i v-else class="fa-solid fa-circle-user text-xl opacity-50"></i>
             </button>
         </header>
+
+        <!-- Auth Panel -->
+        <div v-if="showAuthPanel" class="bg-white border-b border-gray-200 shadow-sm z-20 shrink-0 px-4 py-3">
+            <!-- 已登入 -->
+            <div v-if="currentUser" class="flex items-center justify-between">
+                <div class="flex items-center gap-2">
+                    <i class="fa-solid fa-circle-check text-green-500"></i>
+                    <span class="text-sm text-gray-700 truncate max-w-[200px]">{{ currentUser.email }}</span>
+                </div>
+                <button @click="signOut" class="text-xs text-red-500 hover:text-red-700 font-medium px-3 py-1 rounded-lg border border-red-200 hover:bg-red-50 transition">
+                    登出
+                </button>
+            </div>
+            <!-- 未登入 -->
+            <div v-else class="flex flex-col gap-2">
+                <p class="text-xs text-gray-500">輸入 Email 取得無密碼登入連結</p>
+                <div class="flex gap-2">
+                    <input
+                        v-model="authEmail"
+                        type="email"
+                        placeholder="your@email.com"
+                        @keyup.enter="sendMagicLink"
+                        class="flex-1 text-sm border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:border-blue-400"
+                    />
+                    <button
+                        @click="sendMagicLink"
+                        :disabled="authLoading || !authEmail"
+                        class="text-sm bg-blue-600 text-white px-4 py-2 rounded-lg disabled:opacity-40 hover:bg-blue-700 transition"
+                    >
+                        <span v-if="authLoading">⏳</span>
+                        <span v-else>寄出</span>
+                    </button>
+                </div>
+            </div>
+        </div>
 
         <!-- Main Content Area -->
         <!-- 修正：加入 flex flex-col 讓子元素可以使用 flex-grow 佔滿空間 -->
@@ -767,6 +806,11 @@
     </div>
 
     <script>
+        // ─── Supabase 設定（部署前請填入您的專案資訊）───────────────────────────
+        const SUPABASE_URL = 'YOUR_SUPABASE_URL';
+        const SUPABASE_ANON_KEY = 'YOUR_SUPABASE_ANON_KEY';
+        const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
         const { createApp, ref, computed, onMounted, nextTick, watch } = Vue;
 
         createApp({
@@ -777,6 +821,12 @@
                 const expandedStageIndex = ref(null);
                 const isWeatherExpanded = ref(false); // 預設收合
                 const journeyLogs = ref([]); // 新增：旅程紀錄
+
+                // Auth 狀態
+                const currentUser = ref(null);
+                const authEmail = ref('');
+                const authLoading = ref(false);
+                const showAuthPanel = ref(false);
 
                 const weather = ref({
                     location: '讀取中...',
@@ -1245,14 +1295,27 @@
 
                     if (navigator.geolocation) {
                         navigator.geolocation.getCurrentPosition(
-                            (pos) => {
+                            async (pos) => {
                                 const lat = pos.coords.latitude.toFixed(4);
                                 const lng = pos.coords.longitude.toFixed(4);
-                                
+
                                 const targetLog = journeyLogs.value.find(l => l.id === newLog.id);
                                 if (targetLog) {
                                     targetLog.coords = `${lat}, ${lng}`;
-                                    showToast("📍 定位成功！");
+                                }
+
+                                if (currentUser.value) {
+                                    const { error } = await supabaseClient.from('journey_logs').insert({
+                                        user_id: currentUser.value.id,
+                                        log_date: newLog.date,
+                                        log_time: newLog.time,
+                                        lat: parseFloat(lat),
+                                        lng: parseFloat(lng),
+                                        note: targetLog?.note || ''
+                                    });
+                                    showToast(error ? '📍 定位成功，雲端上傳失敗' : '📍 定位成功，已上傳雲端 ☁️');
+                                } else {
+                                    showToast('📍 定位成功（未登入，僅存本機）');
                                 }
                             },
                             (err) => {
@@ -1452,7 +1515,38 @@
                 };
 
                 const showSyncStatus = () => {
-                    showToast("資料已自動儲存");
+                    showAuthPanel.value = !showAuthPanel.value;
+                };
+
+                const initAuth = async () => {
+                    const { data: { session } } = await supabaseClient.auth.getSession();
+                    currentUser.value = session?.user ?? null;
+                    supabaseClient.auth.onAuthStateChange((_event, session) => {
+                        currentUser.value = session?.user ?? null;
+                    });
+                };
+
+                const sendMagicLink = async () => {
+                    if (!authEmail.value) return;
+                    authLoading.value = true;
+                    const { error } = await supabaseClient.auth.signInWithOtp({
+                        email: authEmail.value,
+                        options: { shouldCreateUser: true }
+                    });
+                    authLoading.value = false;
+                    if (error) {
+                        showToast('⚠️ 寄送失敗：' + error.message);
+                    } else {
+                        showToast('📧 登入連結已寄出，請查收信件');
+                        authEmail.value = '';
+                        showAuthPanel.value = false;
+                    }
+                };
+
+                const signOut = async () => {
+                    await supabaseClient.auth.signOut();
+                    showToast('已登出');
+                    showAuthPanel.value = false;
                 };
 
                 const getPoiTypeLabel = (type) => {
@@ -1670,6 +1764,7 @@
                 onMounted(() => {
                     loadState();
                     fetchWeather();
+                    initAuth();
                 });
 
                 // 監聽器
@@ -1747,7 +1842,14 @@
                     // Drag to reorder
                     dragSort,
                     isReordering,
-                    getItemStyle
+                    getItemStyle,
+                    // Auth
+                    currentUser,
+                    authEmail,
+                    authLoading,
+                    showAuthPanel,
+                    sendMagicLink,
+                    signOut
                 };
             }
         }).mount('#app');
