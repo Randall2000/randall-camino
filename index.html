@@ -451,31 +451,6 @@
                         </button>
                     </div>
                 </transition>
-
-                <!-- Journey Logs Panel (地圖底部打卡紀錄) -->
-                <div v-if="journeyLogs.length > 0 && !selectedPOI" class="bg-white border-t border-gray-100 shadow-inner z-[300] shrink-0" style="max-height: 36vh;">
-                    <div class="flex items-center justify-between px-4 py-2 border-b border-gray-100">
-                        <span class="text-xs font-semibold text-gray-500 tracking-wide">📍 打卡足跡（{{ journeyLogs.length }}）</span>
-                        <button @click="setView('dashboard')" class="text-xs text-blue-500">查看全部</button>
-                    </div>
-                    <div class="overflow-y-auto hide-scrollbar" style="max-height: calc(36vh - 37px);">
-                        <div v-for="(log, idx) in journeyLogs.slice().reverse()" :key="log.id"
-                             class="flex items-start gap-3 px-4 py-3 border-b border-gray-50 last:border-0 active:bg-gray-50"
-                             @click="openGoogleMaps(log.coords)">
-                            <div class="w-7 h-7 rounded-full bg-blue-100 flex items-center justify-center shrink-0 mt-0.5">
-                                <span class="text-xs font-bold text-blue-600">{{ journeyLogs.length - idx }}</span>
-                            </div>
-                            <div class="flex-1 min-w-0">
-                                <div class="flex items-center gap-2">
-                                    <span class="text-xs font-medium text-gray-700">{{ log.date }} {{ log.time }}</span>
-                                    <i v-if="log.coords && !log.coords.includes('失敗') && !log.coords.includes('中')" class="fa-solid fa-location-dot text-blue-400 text-xs"></i>
-                                </div>
-                                <p class="text-xs text-gray-400 truncate mt-0.5">{{ log.coords }}</p>
-                                <p v-if="log.note" class="text-xs text-gray-600 mt-0.5 truncate">{{ log.note }}</p>
-                            </div>
-                        </div>
-                    </div>
-                </div>
             </div>
 
             <!-- VIEW: STAGES -->
