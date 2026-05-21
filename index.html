@@ -132,10 +132,10 @@
 
         <!-- Main Content Area -->
         <!-- 修正：加入 flex flex-col 讓子元素可以使用 flex-grow 佔滿空間 -->
-        <main class="flex-grow overflow-y-auto hide-scrollbar relative bg-gray-50 flex flex-col">
+        <main class="flex-grow relative bg-gray-50 flex flex-col min-h-0">
             
             <!-- VIEW: DASHBOARD -->
-            <div v-if="currentView === 'dashboard'" class="p-4 space-y-4 pb-36 shrink-0">
+            <div v-if="currentView === 'dashboard'" class="p-4 space-y-4 pb-36 overflow-y-auto hide-scrollbar">
                 
                 <!-- Weather Forecast & Clothing Advice Widget (Collapsible) -->
                 <div class="bg-gradient-to-br from-blue-600 to-blue-400 rounded-2xl text-white shadow-lg relative overflow-hidden transition-all duration-300"
@@ -338,9 +338,8 @@
             </div>
 
             <!-- VIEW: MAP -->
-            <!-- 修正：改用 flex-grow 與 relative 佈局，讓地圖自動填滿剩餘空間，解決高度為 0 的問題 -->
-            <div v-show="currentView === 'map'" class="flex-grow w-full h-full relative z-10 bg-gray-100">
-                <div id="map" class="absolute inset-0 w-full h-full"></div>
+            <div v-show="currentView === 'map'" class="flex-grow flex flex-col relative z-10 bg-gray-100 min-h-0">
+                <div id="map" class="flex-grow relative z-0"></div>
                 
                 <!-- Map Controls Overlay -->
                 <div class="absolute top-4 right-4 z-[400] flex flex-col gap-2">
@@ -452,10 +451,35 @@
                         </button>
                     </div>
                 </transition>
+
+                <!-- Journey Logs Panel (地圖底部打卡紀錄) -->
+                <div v-if="journeyLogs.length > 0 && !selectedPOI" class="bg-white border-t border-gray-100 shadow-inner z-[300] shrink-0" style="max-height: 36vh;">
+                    <div class="flex items-center justify-between px-4 py-2 border-b border-gray-100">
+                        <span class="text-xs font-semibold text-gray-500 tracking-wide">📍 打卡足跡（{{ journeyLogs.length }}）</span>
+                        <button @click="setView('dashboard')" class="text-xs text-blue-500">查看全部</button>
+                    </div>
+                    <div class="overflow-y-auto hide-scrollbar" style="max-height: calc(36vh - 37px);">
+                        <div v-for="(log, idx) in journeyLogs.slice().reverse()" :key="log.id"
+                             class="flex items-start gap-3 px-4 py-3 border-b border-gray-50 last:border-0 active:bg-gray-50"
+                             @click="openGoogleMaps(log.coords)">
+                            <div class="w-7 h-7 rounded-full bg-blue-100 flex items-center justify-center shrink-0 mt-0.5">
+                                <span class="text-xs font-bold text-blue-600">{{ journeyLogs.length - idx }}</span>
+                            </div>
+                            <div class="flex-1 min-w-0">
+                                <div class="flex items-center gap-2">
+                                    <span class="text-xs font-medium text-gray-700">{{ log.date }} {{ log.time }}</span>
+                                    <i v-if="log.coords && !log.coords.includes('失敗') && !log.coords.includes('中')" class="fa-solid fa-location-dot text-blue-400 text-xs"></i>
+                                </div>
+                                <p class="text-xs text-gray-400 truncate mt-0.5">{{ log.coords }}</p>
+                                <p v-if="log.note" class="text-xs text-gray-600 mt-0.5 truncate">{{ log.note }}</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </div>
 
             <!-- VIEW: STAGES -->
-            <div v-if="currentView === 'stages'" class="p-4 space-y-3 pb-36 shrink-0">
+            <div v-if="currentView === 'stages'" class="p-4 space-y-3 pb-36 overflow-y-auto hide-scrollbar">
                 <div class="flex justify-between items-center mb-2">
                     <h2 class="font-bold text-xl">30 天行程規劃</h2>
                     <span class="text-xs bg-yellow-100 text-yellow-800 px-2 py-1 rounded">步行總計 {{ totalKm.toFixed(1) }} km</span>
@@ -575,7 +599,7 @@
             </div>
 
             <!-- VIEW: GUIDE -->
-            <div v-if="currentView === 'guide'" class="p-0 h-full flex flex-col">
+            <div v-if="currentView === 'guide'" class="p-0 flex-grow flex flex-col min-h-0">
                 <!-- Tabs -->
                 <div class="flex border-b border-gray-200 bg-white">
                     <button @click="guideTab = 'packing'" :class="guideTab === 'packing' ? 'border-blue-600 text-blue-600' : 'border-transparent text-gray-500'" class="flex-1 py-3 text-sm font-medium border-b-2 transition">裝備清單</button>
