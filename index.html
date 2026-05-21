@@ -257,8 +257,8 @@
                 </div>
             </div>
 
-            <div v-show="currentView === 'map'" class="flex-grow w-full h-full relative z-10 bg-gray-100 overflow-hidden">
-                <div id="map" class="absolute inset-0 w-full h-full"></div>
+            <div v-show="currentView === 'map'" class="flex-grow w-full relative z-10 bg-gray-100" style="min-height: 0;">
+                <div id="map" style="position: absolute; inset: 0; width: 100%; height: 100%;"></div>
                 
                 <div class="absolute top-4 right-4 z-[399] flex flex-col gap-2">
                     <button @click="locateUser" class="bg-white w-10 h-10 rounded-full shadow-md flex items-center justify-center text-blue-600 active:bg-gray-100">
@@ -1073,7 +1073,7 @@
                                 map.invalidateSize();
                                 fitRoute();
                             }
-                        }, 100);
+                        }, 200);
                     }
                 };
                 
