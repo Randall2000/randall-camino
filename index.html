@@ -1095,6 +1095,10 @@
                 };
 
                 const quickLog = () => {
+                    if (!currentUser.value) {
+                        showToast('🔒 請先登入才能打卡');
+                        return;
+                    }
                     const now = new Date();
                     const dateStr = now.toLocaleDateString();
                     const timeStr = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
