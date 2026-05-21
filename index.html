@@ -5,23 +5,17 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Buen Camino - 法國之路助手</title>
     
-    <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     
-    <!-- Vue.js 3 -->
     <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
     
-    <!-- Leaflet CSS & JS (地圖) -->
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     
-    <!-- FontAwesome (圖標) -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
-    <!-- Google Fonts -->
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 
-    <!-- Supabase -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
     <style>
@@ -75,7 +69,6 @@
 
     <div id="app" class="h-full flex flex-col relative max-w-md mx-auto bg-white shadow-2xl overflow-hidden">
         
-        <!-- Top Bar (Header) -->
         <header class="bg-blue-600 text-white p-4 shadow-md z-20 flex justify-between items-center shrink-0">
             <div class="flex items-center gap-3">
                 <i class="fa-solid fa-shell text-yellow-300 text-2xl"></i>
@@ -90,9 +83,7 @@
             </button>
         </header>
 
-        <!-- Auth Panel -->
         <div v-if="showAuthPanel" class="bg-white border-b border-gray-200 shadow-sm z-20 shrink-0 px-4 py-3">
-            <!-- 已登入 -->
             <div v-if="currentUser" class="flex items-center justify-between">
                 <div class="flex items-center gap-2">
                     <i class="fa-solid fa-circle-check text-green-500"></i>
@@ -102,7 +93,6 @@
                     登出
                 </button>
             </div>
-            <!-- 未登入 -->
             <div v-else class="flex flex-col gap-2">
                 <div class="flex gap-2">
                     <input
@@ -130,23 +120,17 @@
             </div>
         </div>
 
-        <!-- Main Content Area -->
-        <!-- 修正：加入 flex flex-col 讓子元素可以使用 flex-grow 佔滿空間 -->
-        <main class="flex-grow relative bg-gray-50 flex flex-col min-h-0">
+        <main class="flex-grow overflow-hidden relative bg-gray-50 flex flex-col">
             
-            <!-- VIEW: DASHBOARD -->
-            <div v-if="currentView === 'dashboard'" class="p-4 space-y-4 pb-36 overflow-y-auto hide-scrollbar">
+            <div v-if="currentView === 'dashboard'" class="flex-grow h-full overflow-y-auto hide-scrollbar p-4 space-y-4 pb-36">
                 
-                <!-- Weather Forecast & Clothing Advice Widget (Collapsible) -->
                 <div class="bg-gradient-to-br from-blue-600 to-blue-400 rounded-2xl text-white shadow-lg relative overflow-hidden transition-all duration-300"
                      :class="isWeatherExpanded ? 'p-5' : 'p-4'">
-                    <!-- Background Decor -->
                     <div class="absolute right-0 top-0 opacity-10 transform translate-x-8 -translate-y-8">
                         <i class="fa-solid text-9xl" :class="weather.icon"></i>
                     </div>
 
                     <div class="relative z-10">
-                        <!-- Header / Main Display -->
                         <div class="flex justify-between items-start" @click="isWeatherExpanded = !isWeatherExpanded">
                             <div class="cursor-pointer">
                                 <p class="text-xs opacity-90 flex items-center gap-1 mb-1"><i class="fa-solid fa-location-dot"></i> {{ weather.location }}</p>
@@ -159,7 +143,6 @@
                                 </div>
                             </div>
 
-                            <!-- Toggle Button & Mini Stats -->
                             <div class="flex flex-col items-end">
                                 <button class="text-white/80 hover:text-white p-1 mb-2">
                                     <i class="fa-solid transition-transform duration-300" :class="isWeatherExpanded ? 'fa-chevron-up' : 'fa-chevron-down'"></i>
@@ -176,10 +159,8 @@
                             </div>
                         </div>
 
-                        <!-- Expanded Content -->
                         <div v-if="isWeatherExpanded" class="mt-4 transition-all duration-300 ease-in-out">
 
-                            <!-- 天氣讀取失敗提示 + Retry -->
                             <div v-if="weather.fetchFailed" class="bg-white/20 rounded-xl p-3 mb-4 flex items-center justify-between">
                                 <span class="text-sm text-white/90"><i class="fa-solid fa-triangle-exclamation mr-1"></i> 無法取得天氣資料</span>
                                 <button @click="fetchWeather" class="bg-white/30 hover:bg-white/40 text-white text-xs font-semibold px-3 py-1.5 rounded-lg transition active:scale-95">
@@ -187,7 +168,6 @@
                                 </button>
                             </div>
 
-                            <!-- Clothing Advice -->
                             <div v-else class="bg-white/20 backdrop-blur-md rounded-xl p-3 mb-5 flex items-start gap-3 border border-white/10">
                                 <div class="bg-yellow-400/20 w-8 h-8 rounded-full flex items-center justify-center shrink-0 text-yellow-300 border border-yellow-200/30">
                                     <i class="fa-solid fa-shirt text-sm"></i>
@@ -198,7 +178,6 @@
                                 </div>
                             </div>
 
-                            <!-- Hourly Forecast (Horizontal Scroll) -->
                             <div class="border-t border-white/10 pt-3">
                                 <div class="flex gap-5 overflow-x-auto pb-2 hide-scrollbar">
                                     <div v-for="(hour, idx) in hourlyForecast" :key="idx" class="flex flex-col items-center gap-1 min-w-[2.5rem]">
@@ -212,11 +191,9 @@
                     </div>
                 </div>
 
-                <!-- Progress Card -->
                 <div class="bg-white rounded-2xl p-5 shadow-sm border border-gray-100">
                     <h3 class="font-bold text-gray-700 mb-3">朝聖進度</h3>
                     <div class="flex items-center gap-4">
-                        <!-- SVG Arc Progress Ring -->
                         <div class="relative w-16 h-16 shrink-0 flex items-center justify-center">
                             <svg class="absolute inset-0 w-full h-full -rotate-90" viewBox="0 0 64 64">
                                 <circle cx="32" cy="32" r="26" fill="none" stroke="#e5e7eb" stroke-width="6" />
@@ -242,16 +219,12 @@
                     </div>
                 </div>
 
-                <!-- Next Stop: 今晚住宿 -->
                 <div v-if="nextStage && nextStage.endAlbergue" class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
-                    <!-- Header bar -->
                     <div class="bg-blue-600 px-4 py-2.5 flex items-center justify-between">
                         <span class="text-white text-xs font-semibold tracking-wide">今晚住宿</span>
                         <span class="text-blue-200 text-xs">Day {{ nextStage.day }} · {{ nextStage.date }}</span>
                     </div>
-                    <!-- Body -->
                     <div class="p-4">
-                        <!-- 住宿名稱（最重要，最大） -->
                         <div class="flex items-start gap-3 mb-3">
                             <div class="w-9 h-9 rounded-xl bg-blue-50 flex items-center justify-center shrink-0 text-blue-500 mt-0.5">
                                 <i class="fa-solid fa-bed"></i>
@@ -261,7 +234,6 @@
                                 <p class="text-xs text-gray-500 mt-0.5">{{ nextStage.to }}</p>
                             </div>
                         </div>
-                        <!-- 路段 + km pills -->
                         <div class="flex items-center gap-2 flex-wrap">
                             <span class="inline-flex items-center gap-1 text-xs text-gray-600 bg-gray-100 px-2.5 py-1 rounded-full">
                                 <i class="fa-solid fa-route text-[10px]"></i>
@@ -277,76 +249,21 @@
                                 {{ nextStage.type === 'train' ? '火車移動' : nextStage.type === 'transport' ? '交通日' : '休息日' }}
                             </span>
                         </div>
-                        <!-- 備註預覽 -->
                         <p v-if="nextStage.description" class="text-xs text-gray-500 mt-2.5 leading-relaxed line-clamp-2">{{ nextStage.description }}</p>
                     </div>
                 </div>
                 <div v-else-if="!nextStage" class="bg-white rounded-2xl p-5 shadow-sm border border-gray-100 flex items-center justify-center gap-2 text-gray-500 text-sm">
                     <i class="fa-solid fa-circle-check text-green-500"></i> 恭喜！所有行程已完成。
                 </div>
-
-                <!-- My Journey Logs (New Section) -->
-                <div class="space-y-2">
-                    <div class="flex justify-between items-center px-1">
-                        <h3 class="font-bold text-gray-700">我的足跡 ({{ journeyLogs.length }})</h3>
-                        <button v-if="journeyLogs.length > 0" @click="clearLogs" class="text-xs text-gray-400 hover:text-red-500">全部清除</button>
-                    </div>
-                    
-                    <!-- 有紀錄時顯示列表 -->
-                    <div v-if="journeyLogs.length > 0" class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
-                        <div v-for="(log, idx) in journeyLogs.slice().reverse()" :key="log.id" 
-                             class="p-4 border-b border-gray-100 last:border-0 flex items-start gap-3">
-                            <div class="bg-yellow-100 text-yellow-600 w-8 h-8 rounded-full flex items-center justify-center shrink-0 text-xs mt-0.5">
-                                <i class="fa-solid fa-location-dot"></i>
-                            </div>
-                            <div class="flex-1 min-w-0">
-                                <div class="flex justify-between items-start">
-                                    <span class="font-bold text-gray-800 text-sm">打卡紀錄 #{{ journeyLogs.length - idx }}</span>
-                                </div>
-                                <p class="text-xs text-gray-500 mt-0.5">{{ log.date }} {{ log.time }}</p>
-                                <p v-if="log.coords" class="text-[10px] text-blue-400 mt-1 flex items-center gap-1 cursor-pointer" @click="openGoogleMaps(log.coords)">
-                                    <i class="fa-solid fa-map-pin"></i> {{ log.coords }}
-                                </p>
-                                <!-- 顯示備註 -->
-                                <p v-if="log.note" class="text-xs text-gray-600 mt-2 bg-gray-50 p-2 rounded border border-gray-100">
-                                    <i class="fa-regular fa-comment-dots mr-1"></i> {{ log.note }}
-                                </p>
-                            </div>
-                            
-                            <!-- 單筆操作按鈕 -->
-                            <div class="flex flex-col gap-2 ml-1">
-                                <button @click="editLogNote(log)" class="text-gray-300 hover:text-blue-500 p-1">
-                                    <i class="fa-solid fa-pen text-xs"></i>
-                                </button>
-                                <button @click="deleteLog(log.id)" class="text-gray-300 hover:text-red-500 p-1">
-                                    <i class="fa-solid fa-trash-can text-xs"></i>
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- 無紀錄時顯示提示 (Empty State) -->
-                    <div v-else class="bg-white rounded-2xl p-8 border border-gray-100 border-dashed flex flex-col items-center justify-center text-center">
-                        <div class="bg-gray-50 w-12 h-12 rounded-full flex items-center justify-center mb-3 text-gray-300">
-                            <i class="fa-solid fa-shoe-prints text-xl"></i>
-                        </div>
-                        <p class="text-sm text-gray-500 font-medium">尚無足跡紀錄</p>
-                        <p class="text-xs text-gray-400 mt-1">點擊下方黃色按鈕開始記錄您的旅程！</p>
-                    </div>
-                </div>
-
             </div>
 
-            <!-- VIEW: MAP -->
-            <div v-show="currentView === 'map'" class="flex-grow flex flex-col relative z-10 bg-gray-100 min-h-0">
-                <div id="map" class="flex-grow relative z-0"></div>
+            <div v-show="currentView === 'map'" class="flex-grow w-full h-full relative z-10 bg-gray-100 overflow-hidden">
+                <div id="map" class="absolute inset-0 w-full h-full"></div>
                 
-                <!-- Map Controls Overlay -->
-                <div class="absolute top-4 right-4 z-[400] flex flex-col gap-2">
+                <div class="absolute top-4 right-4 z-[399] flex flex-col gap-2">
                     <button @click="locateUser" class="bg-white w-10 h-10 rounded-full shadow-md flex items-center justify-center text-blue-600 active:bg-gray-100">
                         <i class="fa-solid fa-location-crosshairs"></i>
                     </button>
-                    <!-- 新增：全覽路線按鈕 -->
                     <button @click="fitRoute" class="bg-white w-10 h-10 rounded-full shadow-md flex items-center justify-center text-yellow-500 active:bg-gray-100">
                         <i class="fa-solid fa-route"></i>
                     </button>
@@ -355,8 +272,7 @@
                     </button>
                 </div>
 
-                <!-- Filter Chips -->
-                <div class="absolute top-4 left-4 z-[400] flex gap-2 overflow-x-auto max-w-[70%] hide-scrollbar">
+                <div class="absolute top-4 left-4 z-[399] flex gap-2 overflow-x-auto max-w-[70%] hide-scrollbar">
                     <button @click="toggleMapFilter('albergue')" :class="filters.albergue ? 'bg-blue-600 text-white' : 'bg-white text-gray-600'" class="px-3 py-1.5 rounded-full text-xs font-medium shadow-md whitespace-nowrap transition">
                         <i class="fa-solid fa-bed mr-1"></i> 住宿
                     </button>
@@ -371,13 +287,11 @@
                     </button>
                 </div>
 
-                <!-- POI Detail Card (Popup replacement) -->
                 <transition name="fade">
-                    <div v-if="selectedPOI" class="absolute bottom-4 left-4 right-4 bg-white rounded-xl shadow-2xl p-4 z-[401] border-l-4 border-yellow-400 max-h-[60vh] overflow-y-auto">
+                    <div v-if="selectedPOI" class="absolute bottom-20 left-4 right-4 bg-white rounded-xl shadow-2xl p-4 z-[401] border-l-4 border-yellow-400 max-h-[50vh] overflow-y-auto">
                         <div class="flex justify-between items-start">
                             <div>
                                 <h3 class="font-bold text-lg">{{ selectedPOI.name }}</h3>
-                                <!-- 類別標籤 -->
                                 <div class="flex items-center gap-2 mt-1 mb-1">
                                     <span v-if="selectedPOI.category" class="text-xs px-2 py-0.5 rounded font-medium"
                                           :class="{
@@ -394,7 +308,6 @@
                         </div>
                         
                         <div v-if="selectedPOI.type === 'albergue'" class="mt-2 text-sm space-y-2">
-                            <!-- Basic Info -->
                             <div class="flex items-center gap-4 text-gray-700">
                                 <div class="flex items-center gap-1">
                                     <i class="fa-solid fa-euro-sign w-4 text-center text-blue-500"></i> 
@@ -406,12 +319,10 @@
                                 </div>
                             </div>
                             
-                            <!-- Phone -->
                             <div class="flex items-center gap-2 text-gray-600">
                                 <i class="fa-solid fa-phone w-4 text-center text-gray-400"></i> {{ selectedPOI.phone }}
                             </div>
 
-                            <!-- Facilities -->
                             <div class="flex flex-wrap gap-1 mt-2">
                                 <span v-for="fac in selectedPOI.facilities" :key="fac" class="text-xs bg-gray-100 px-2 py-1 rounded text-gray-600 flex items-center gap-1">
                                     <i v-if="fac === 'kitchen'" class="fa-solid fa-fire-burner"></i>
@@ -427,12 +338,10 @@
                                 </span>
                             </div>
 
-                            <!-- Description -->
                             <p class="text-gray-600 text-xs leading-relaxed border-t border-gray-100 pt-2 mt-2">
                                 {{ selectedPOI.description }}
                             </p>
 
-                            <!-- Landmarks -->
                             <div v-if="selectedPOI.landmarks" class="bg-yellow-50 p-2 rounded-lg border border-yellow-100 mt-2">
                                 <div class="flex items-start gap-2">
                                     <i class="fa-solid fa-map-pin text-yellow-600 mt-0.5 text-xs"></i>
@@ -451,10 +360,63 @@
                         </button>
                     </div>
                 </transition>
+
+                <div class="absolute inset-x-0 bottom-0 flex flex-col bg-white shadow-[0_-4px_20px_rgba(0,0,0,0.15)] rounded-t-3xl transition-all duration-300 z-[400]"
+                     :class="isLogSheetExpanded ? 'h-[65%]' : 'h-14'">
+                    
+                    <div class="flex flex-col items-center shrink-0 w-full cursor-pointer bg-white rounded-t-3xl" @click="isLogSheetExpanded = !isLogSheetExpanded">
+                        <div class="w-12 h-1.5 bg-gray-300 rounded-full mt-3 mb-2"></div>
+                        <div class="px-5 pb-3 w-full flex justify-between items-center border-b border-gray-100">
+                            <h3 class="text-sm font-bold text-gray-700">我的足跡 ({{ journeyLogs.length }})</h3>
+                            <div class="flex items-center gap-4">
+                                <button v-if="journeyLogs.length > 0" @click.stop="clearLogs" class="text-xs text-gray-400 hover:text-red-500">全部清除</button>
+                                <i class="fa-solid fa-chevron-up text-gray-400 transition-transform duration-300" :class="isLogSheetExpanded ? 'rotate-180' : ''"></i>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="flex-1 p-4 overflow-y-auto hide-scrollbar bg-gray-50 pb-8">
+                        <div v-if="journeyLogs.length > 0" class="space-y-3">
+                            <div v-for="(log, idx) in journeyLogs.slice().reverse()" :key="log.id" 
+                                 class="bg-white p-4 rounded-xl shadow-sm border border-gray-100 flex items-start gap-3">
+                                <div class="bg-yellow-100 text-yellow-600 w-8 h-8 rounded-full flex items-center justify-center shrink-0 text-xs mt-0.5">
+                                    <i class="fa-solid fa-location-dot"></i>
+                                </div>
+                                <div class="flex-1 min-w-0">
+                                    <div class="flex justify-between items-start">
+                                        <span class="font-bold text-gray-800 text-sm">打卡紀錄 #{{ journeyLogs.length - idx }}</span>
+                                    </div>
+                                    <p class="text-xs text-gray-500 mt-0.5">{{ log.date }} {{ log.time }}</p>
+                                    <p v-if="log.coords" class="text-[10px] text-blue-400 mt-1 flex items-center gap-1 cursor-pointer" @click="openGoogleMaps(log.coords)">
+                                        <i class="fa-solid fa-map-pin"></i> {{ log.coords }}
+                                    </p>
+                                    <p v-if="log.note" class="text-xs text-gray-600 mt-2 bg-gray-50 p-2 rounded border border-gray-100">
+                                        <i class="fa-regular fa-comment-dots mr-1"></i> {{ log.note }}
+                                    </p>
+                                </div>
+                                <div class="flex flex-col gap-2 ml-1">
+                                    <button @click="editLogNote(log)" class="text-gray-300 hover:text-blue-500 p-1">
+                                        <i class="fa-solid fa-pen text-xs"></i>
+                                    </button>
+                                    <button @click="deleteLog(log.id)" class="text-gray-300 hover:text-red-500 p-1">
+                                        <i class="fa-solid fa-trash-can text-xs"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div v-else class="h-full flex flex-col items-center justify-center text-center pb-10">
+                            <div class="bg-gray-200 w-12 h-12 rounded-full flex items-center justify-center mb-3 text-gray-400">
+                                <i class="fa-solid fa-shoe-prints text-xl"></i>
+                            </div>
+                            <p class="text-sm text-gray-500 font-medium">尚無足跡紀錄</p>
+                            <p class="text-xs text-gray-400 mt-1">點擊下方黃色按鈕開始記錄！</p>
+                        </div>
+                    </div>
+                </div>
             </div>
 
-            <!-- VIEW: STAGES -->
-            <div v-if="currentView === 'stages'" class="p-4 space-y-3 pb-36 overflow-y-auto hide-scrollbar">
+            <div v-if="currentView === 'stages'" class="flex-grow h-full overflow-y-auto hide-scrollbar p-4 space-y-3 pb-36">
                 <div class="flex justify-between items-center mb-2">
                     <h2 class="font-bold text-xl">30 天行程規劃</h2>
                     <span class="text-xs bg-yellow-100 text-yellow-800 px-2 py-1 rounded">步行總計 {{ totalKm.toFixed(1) }} km</span>
@@ -469,7 +431,6 @@
                         (!stage.type || stage.type === 'normal') ? 'border-gray-100' : ''
                      ]">
                     <div class="p-4 flex items-center gap-3 cursor-pointer active:bg-gray-50 transition-colors" @click="expandStage(index)">
-                        <!-- Day badge -->
                         <div class="shrink-0 w-11 h-11 rounded-xl flex flex-col items-center justify-center text-center"
                              :class="{
                                 'bg-orange-100 text-orange-700': stage.type === 'train',
@@ -502,10 +463,8 @@
                         </div>
                     </div>
                     
-                    <!-- Expanded Details -->
                     <div v-if="expandedStageIndex === index" class="px-4 pb-4 text-sm text-gray-600 border-t border-gray-50">
 
-                        <!-- 難度 + 地圖按鈕 (走路路段才顯示) -->
                         <div v-if="stage.type !== 'rest' && stage.type !== 'bus' && stage.type !== 'train' && stage.type !== 'transport' && stage.difficulty && stage.difficulty !== 'None'" class="flex items-center justify-between mt-3 mb-3">
                             <div class="flex items-center gap-2">
                                 <span class="text-xs text-gray-500">難度</span>
@@ -524,7 +483,6 @@
                         </div>
                         <div v-else class="mt-3"></div>
 
-                        <!-- 住宿資訊 -->
                         <div v-if="stage.startAlbergue || stage.endAlbergue" class="bg-gray-50 rounded-xl p-3 mb-3 space-y-2">
                             <div v-if="stage.startAlbergue" class="flex gap-2 text-xs">
                                 <span class="text-gray-400 shrink-0">出發點</span>
@@ -536,13 +494,11 @@
                             </div>
                         </div>
 
-                        <!-- 備註 / 攻略 -->
                         <div v-if="stage.description" class="bg-yellow-50 p-3 rounded-xl border border-yellow-100 text-gray-700 text-xs leading-relaxed mb-3">
                             <span class="font-bold text-yellow-800 block mb-1"><i class="fa-solid fa-lightbulb"></i> 攻略備註</span>
                             {{ stage.description }}
                         </div>
 
-                        <!-- 推薦住宿 POI (走路路段) -->
                         <div v-if="stage.to && stage.type !== 'bus' && stage.type !== 'train' && stage.type !== 'transport' && stage.type !== 'rest' && getStagePois(stage.to).length > 0">
                             <h4 class="font-semibold text-gray-600 text-xs mb-2 flex items-center gap-1">
                                 <i class="fa-solid fa-bed text-blue-400"></i> 周邊庇護所
@@ -573,18 +529,14 @@
                 </div>
             </div>
 
-            <!-- VIEW: GUIDE -->
-            <div v-if="currentView === 'guide'" class="p-0 flex-grow flex flex-col min-h-0">
-                <!-- Tabs -->
-                <div class="flex border-b border-gray-200 bg-white">
+            <div v-if="currentView === 'guide'" class="flex-grow h-full flex flex-col overflow-hidden">
+                <div class="flex border-b border-gray-200 bg-white shrink-0">
                     <button @click="guideTab = 'packing'" :class="guideTab === 'packing' ? 'border-blue-600 text-blue-600' : 'border-transparent text-gray-500'" class="flex-1 py-3 text-sm font-medium border-b-2 transition">裝備清單</button>
                     <button @click="guideTab = 'emergency'" :class="guideTab === 'emergency' ? 'border-red-600 text-red-600' : 'border-transparent text-gray-500'" class="flex-1 py-3 text-sm font-medium border-b-2 transition">緊急資訊</button>
                 </div>
 
-                <div class="p-4 overflow-y-auto pb-36 shrink-0">
-                    <!-- Packing List -->
+                <div class="flex-grow overflow-y-auto p-4 pb-36 hide-scrollbar">
                     <div v-if="guideTab === 'packing'">
-                        <!-- Weight Dashboard -->
                         <div class="bg-white rounded-xl p-4 shadow-sm border border-gray-100 mb-6">
                             <div class="flex items-center justify-between">
                                 <div>
@@ -609,10 +561,8 @@
                                 </button>
                             </h3>
                             <div class="space-y-2">
-                                <!-- List Items Wrapper -->
                                 <template v-for="(item, idx) in category" :key="idx">
                                     
-                                    <!-- Editing Mode (Inline Input) -->
                                     <div v-if="editingState.category === catName && editingState.index === idx" 
                                          class="flex items-center gap-2 bg-blue-50 p-2 rounded-lg border border-blue-200 shadow-inner h-[58px]">
                                         <input type="text" v-model="editForm.name" 
@@ -626,30 +576,25 @@
                                         </button>
                                     </div>
 
-                                    <!-- Item Container -->
                                     <div v-else class="relative rounded-lg h-[58px] select-none"
                                          :class="dragSort.active && dragSort.category === catName && dragSort.fromIndex === idx ? 'z-[30]' : ''">
 
-                                        <!-- Edit Mode -->
                                         <div v-if="editModeCategory === catName"
                                              class="absolute inset-0 bg-white border border-gray-100 rounded-lg flex items-center"
                                              :class="isReordering ? '' : 'transition-transform duration-150 ease-out'"
                                              :style="getItemStyle(catName, idx)">
 
-                                            <!-- Delete Button -->
                                             <button @click="deleteItemDirect(catName, idx)"
                                                     class="shrink-0 w-11 h-11 flex items-center justify-center text-red-500 active:opacity-60 ml-1">
                                                 <i class="fa-solid fa-circle-minus text-xl"></i>
                                             </button>
 
-                                            <!-- Content (tap to edit) -->
                                             <div @click="startEditing(catName, idx)"
                                                  class="flex-1 flex justify-between items-center min-w-0 px-2 cursor-pointer h-full">
                                                 <span class="truncate text-gray-800">{{ item.name }}</span>
                                                 <span v-if="item.weight" class="text-xs text-gray-400 bg-gray-50 px-1.5 py-0.5 rounded ml-2 whitespace-nowrap shrink-0">{{ item.weight }}g</span>
                                             </div>
 
-                                            <!-- Drag Handle -->
                                             <div class="shrink-0 w-11 h-11 flex items-center justify-center text-gray-300 touch-none cursor-grab active:cursor-grabbing mr-1"
                                                  @touchstart.stop.prevent="startDragFromHandle($event, catName, idx)"
                                                  @mousedown.stop="startDragFromHandle($event, catName, idx)">
@@ -657,11 +602,9 @@
                                             </div>
                                         </div>
 
-                                        <!-- Normal Mode -->
                                         <div v-else
                                              class="absolute inset-0 bg-white border border-gray-100 rounded-lg flex items-center px-3 gap-2 transition-transform duration-150 ease-out">
 
-                                            <!-- Checkbox -->
                                             <div @click="toggleItem(catName, idx)"
                                                  class="cursor-pointer shrink-0 p-3 -m-1">
                                                 <div class="w-5 h-5 rounded-full border flex items-center justify-center transition-colors"
@@ -670,7 +613,6 @@
                                                 </div>
                                             </div>
 
-                                            <!-- Content -->
                                             <div class="flex-1 flex justify-between items-center min-w-0">
                                                 <span class="truncate" :class="{'text-gray-400 line-through': item.checked}">{{ item.name }}</span>
                                                 <span v-if="item.weight" class="text-xs text-gray-400 bg-gray-50 px-1.5 py-0.5 rounded ml-2 whitespace-nowrap shrink-0">{{ item.weight }}g</span>
@@ -679,7 +621,6 @@
                                     </div>
                                 </template>
 
-                                <!-- Add Item Row -->
                                 <div class="flex items-center gap-2 mt-2 px-1 pt-1 h-[40px]">
                                     <div class="w-5 h-5 flex items-center justify-center text-gray-300">
                                         <i class="fa-solid fa-plus text-xs"></i>
@@ -702,7 +643,6 @@
                         </div>
                     </div>
 
-                    <!-- Emergency -->
                     <div v-if="guideTab === 'emergency'" class="space-y-4">
                         <div class="bg-red-50 border border-red-200 p-4 rounded-xl">
                             <h3 class="font-bold text-red-700 text-lg mb-2"><i class="fa-solid fa-triangle-exclamation"></i> 歐盟緊急電話</h3>
@@ -739,7 +679,6 @@
 
         </main>
 
-        <!-- Bottom Navigation -->
         <nav class="bg-white border-t border-gray-200 grid grid-cols-[1fr_1fr_1.5fr_1fr_1fr] h-20 shrink-0 z-30 relative px-2" style="padding-bottom: env(safe-area-inset-bottom)">
             <button @click="setView('dashboard')" :class="currentView === 'dashboard' ? 'text-blue-600' : 'text-gray-400'" class="flex flex-col items-center justify-center h-full">
                 <i class="fa-solid fa-house text-xl mb-1"></i>
@@ -750,7 +689,6 @@
                 <span class="text-[10px] font-medium">地圖</span>
             </button>
             
-            <!-- 中間按鈕區塊 -->
             <div class="flex justify-center items-center relative">
                 <button class="absolute -top-8 bg-yellow-400 text-white w-20 h-20 rounded-full shadow-xl flex items-center justify-center border-4 border-white transform active:scale-95 transition z-40 overflow-visible" @click="quickLog">
                     <i class="fa-solid fa-person-hiking text-3xl"></i>
@@ -767,14 +705,12 @@
             </button>
         </nav>
 
-        <!-- Toast Notification -->
         <transition name="fade">
             <div v-if="toastMsg" class="absolute bottom-24 left-1/2 transform -translate-x-1/2 bg-gray-800 text-white px-4 py-2.5 rounded-xl shadow-lg z-50 text-sm whitespace-nowrap">
                 {{ toastMsg }}
             </div>
         </transition>
 
-        <!-- 自訂確認對話框 -->
         <transition name="fade">
             <div v-if="confirmDialog.visible" class="absolute inset-0 bg-black/40 z-[60] flex items-end justify-center" @click.self="cancelConfirm">
                 <div class="bg-white w-full rounded-t-2xl p-6 shadow-2xl">
@@ -788,7 +724,6 @@
             </div>
         </transition>
 
-        <!-- 備註編輯 Bottom Sheet -->
         <transition name="fade">
             <div v-if="editNoteSheet.visible" class="absolute inset-0 bg-black/40 z-[60] flex items-end justify-center" @click.self="cancelEditSheet">
                 <div class="bg-white w-full rounded-t-2xl p-5 shadow-2xl">
@@ -824,7 +759,8 @@
                 const toastMsg = ref('');
                 const expandedStageIndex = ref(null);
                 const isWeatherExpanded = ref(false); // 預設收合
-                const journeyLogs = ref([]); // 新增：旅程紀錄
+                const journeyLogs = ref([]); // 打卡紀錄
+                const isLogSheetExpanded = ref(false); // 修正：控制地圖頁打卡紀錄展開狀態
 
                 // Auth 狀態
                 const currentUser = ref(null);
@@ -862,7 +798,6 @@
                 // 地圖相關
                 let map = null;
                 let userMarker = null;
-                // 新增：用於管理足跡線條與標記的 Layer Group
                 let journeyLayerGroup = null; 
 
                 const selectedPOI = ref(null);
@@ -954,118 +889,41 @@
                     }
                 };
 
-                // 30 天行程規劃（2026/05/26 出發）
                 const stages = ref([
-                    // Day 0: 交通日 Paris → SJPP
-                    { day: 0, date: '5/26', from: 'Paris', to: 'Saint-Jean-Pied-de-Port', km: 0, difficulty: 'None', type: 'transport', terrain: '交通日', lat: 43.1636, lng: -1.2358, completed: false,
-                      startAlbergue: 'Le 55 Montparnasse Hotel, Paris',
-                      endAlbergue: '6 Rte d\'Arnéguy, 64220 Saint-Jean-Pied-de-Port',
-                      description: '🚐 7:05 從 Paris 出發，11:05 抵達 Bayonne，再轉車前往 SJPP。抵達後至朝聖辦公室領取朝聖者護照。' },
-                    // Day 1–12: Part 1 SJPP → Burgos
-                    { day: 1, date: '5/27', from: 'Saint-Jean-Pied-de-Port', to: 'Roncesvalles', km: 25, difficulty: 'Hard', terrain: 'Mountain', lat: 43.0094, lng: -1.3194, completed: false,
-                      startAlbergue: 'Saint-Jean-Pied-de-Port',
-                      endAlbergue: 'Roncesvalles',
-                      description: '法國之路最艱難也最壯麗的一天，翻越庇里牛斯山。出發前記得到朝聖辦公室（Pilgrim Information Office SJPP）蓋第一個章。' },
-                    { day: 2, date: '5/28', from: 'Roncesvalles', to: 'Zubiri', km: 21.3, difficulty: 'Medium', terrain: 'Forest Path', lat: 42.9309, lng: -1.5034, completed: false,
-                      startAlbergue: 'Roncesvalles',
-                      endAlbergue: 'Albergue El Palo de Avellano',
-                      description: '穿梭幽靜森林小徑，讓雙腿從第一天的山路中慢慢恢復。今晚入住 Albergue El Palo de Avellano。' },
-                    { day: 3, date: '5/29', from: 'Zubiri', to: 'Pamplona', km: 20.3, difficulty: 'Easy', terrain: 'Road/Path', lat: 42.8125, lng: -1.6458, completed: false,
-                      endAlbergue: 'Pamplona',
-                      description: '輕鬆走進第一個大城 Pamplona，記得參觀主教堂並享用 Tapas！' },
-                    { day: 4, date: '5/30', from: 'Pamplona', to: 'Puente la Reina', km: 23.7, difficulty: 'Medium', terrain: 'Alto del Perdón', lat: 42.6719, lng: -1.8153, completed: false,
-                      endAlbergue: 'Puente la Reina',
-                      description: '攀登著名的「寬恕之嶺」(Alto del Perdón)，與朝聖者鐵雕合影留念。' },
-                    { day: 5, date: '5/31', from: 'Puente la Reina', to: 'Estella', km: 22, difficulty: 'Medium', terrain: 'Rolling Hills', lat: 42.6713, lng: -2.0313, completed: false,
-                      endAlbergue: 'Estella',
-                      description: '享受中世紀村莊風光，Estella 歷史氛圍濃厚。' },
-                    { day: 6, date: '6/01', from: 'Estella', to: 'Los Arcos', km: 21.4, difficulty: 'Medium', terrain: 'Rolling', lat: 42.5694, lng: -2.1906, completed: false,
-                      endAlbergue: 'Los Arcos',
-                      description: '今天亮點是免費酒泉 Fuente de Vino，朝聖者可自由取用葡萄酒！' },
-                    { day: 7, date: '6/02', from: 'Los Arcos', to: 'Logroño', km: 27.7, difficulty: 'Hard', terrain: 'Rolling', lat: 42.4664, lng: -2.4456, completed: false,
-                      endAlbergue: 'Logroño',
-                      description: '走進 La Rioja 葡萄酒產區首都 Logroño，晚上必去 Laurel 街吃 Pintxos。' },
-                    { day: 8, date: '6/03', from: 'Logroño', to: 'Nájera', km: 28.3, difficulty: 'Hard', terrain: 'Vineyards', lat: 42.4156, lng: -2.7344, completed: false,
-                      endAlbergue: 'Nájera',
-                      description: '接近 30km 的一天，地勢平坦，沿途經過美麗的葡萄園。' },
-                    { day: 9, date: '6/04', from: 'Nájera', to: 'Santo Domingo de la Calzada', km: 20.9, difficulty: 'Easy', terrain: 'Rolling', lat: 42.4394, lng: -2.9536, completed: false,
-                      endAlbergue: 'Santo Domingo de la Calzada',
-                      description: '輕鬆的一天，終點是著名「雞舍奇蹟」教堂所在地。' },
-                    { day: 10, date: '6/05', from: 'Santo Domingo de la Calzada', to: 'Belorado', km: 22.7, difficulty: 'Medium', terrain: 'Flat', lat: 42.4194, lng: -3.1911, completed: false,
-                      endAlbergue: 'Hostel.B（59€，私人兩床房）',
-                      description: '今晚入住預訂好的 Hostel.B 私人兩床房（Calle Cuatro Cantones 4D, Belorado）。' },
-                    { day: 11, date: '6/06', from: 'Belorado', to: 'San Juan de Ortega', km: 23.9, difficulty: 'Medium', terrain: 'Forest', lat: 42.3758, lng: -3.4364, completed: false,
-                      endAlbergue: 'San Juan de Ortega',
-                      description: '穿越橡樹與松樹混合的森林，抵達由聖人自建的修道院聚落。' },
-                    { day: 12, date: '6/07', from: 'San Juan de Ortega', to: 'Burgos', km: 26, difficulty: 'Medium', terrain: 'Flat/Urban', lat: 42.3408, lng: -3.7028, completed: false,
-                      endAlbergue: 'Burgos',
-                      description: '抵達擁有世界遺產大教堂的 Burgos，第一段步行正式完結！明天搭火車前往 León。' },
-                    // Day 13: 火車 Burgos → León
-                    { day: 13, date: '6/08', from: 'Burgos', to: 'León', km: 0, difficulty: 'None', type: 'train', terrain: '火車移動', lat: 42.5987, lng: -5.5671, completed: false,
-                      startAlbergue: 'Burgos 火車站',
-                      endAlbergue: 'León',
-                      description: '🚂 9:34 從 Burgos 出發，12:01 抵達 León，車程約 2 小時，票價 38.8€。請於 Renfe 官網訂票。' },
-                    // Day 14–21: Part 2 León → Sarria
-                    { day: 14, date: '6/09', from: 'León', to: 'Villar de Mazarife', km: 21, difficulty: 'Easy', terrain: 'Flat/Meseta', lat: 42.5581, lng: -5.7678, completed: false,
-                      endAlbergue: 'Villar de Mazarife',
-                      description: '從 León 出發，進入廣闊的麥塞塔高原，步道平坦，風景開闊。' },
-                    { day: 15, date: '6/10', from: 'Villar de Mazarife', to: 'Astorga', km: 30, difficulty: 'Hard', terrain: 'Flat/Meseta', lat: 42.4597, lng: -6.0567, completed: false,
-                      endAlbergue: 'Astorga',
-                      description: '今天是 30km 的長距離挑戰，終點 Astorga 有高第設計的主教宮值得一看。' },
-                    { day: 16, date: '6/11', from: 'Astorga', to: 'Rabanal del Camino', km: 19.8, difficulty: 'Easy', terrain: 'Rolling/Uphill', lat: 42.4789, lng: -6.2889, completed: false,
-                      endAlbergue: 'Rabanal del Camino',
-                      description: '輕鬆攀升進入山區，為明天的長程山路做準備。' },
-                    { day: 17, date: '6/12', from: 'Rabanal del Camino', to: 'Ponferrada', km: 32.2, difficulty: 'Hard', terrain: 'Mountain/Descent', lat: 42.5466, lng: -6.5967, completed: false,
-                      endAlbergue: 'Ponferrada',
-                      description: '翻越鐵十字架 (Cruz de Ferro)，在此放下石頭象徵卸下重擔。今天全程最長，下坡後抵達有聖殿騎士城堡的 Ponferrada。' },
-                    { day: 18, date: '6/13', from: 'Ponferrada', to: 'Villafranca del Bierzo', km: 24.7, difficulty: 'Medium', terrain: 'Rolling/Valley', lat: 42.6092, lng: -6.8092, completed: false,
-                      endAlbergue: 'Villafranca del Bierzo',
-                      description: '沿著比埃爾佐河谷行走，Villafranca 是進入加利西亞前最後的大鎮。' },
-                    { day: 19, date: '6/14', from: 'Villafranca del Bierzo', to: 'O Cebreiro', km: 28.8, difficulty: 'Hard', terrain: 'Mountain Climb', lat: 42.7064, lng: -7.0428, completed: false,
-                      endAlbergue: 'O Cebreiro',
-                      description: '最後一次大爬坡！攀登至 1300 公尺的 O Cebreiro，正式進入加利西亞省。' },
-                    { day: 20, date: '6/15', from: 'O Cebreiro', to: 'Triacastela', km: 20.8, difficulty: 'Easy', terrain: 'Descent/Rolling', lat: 42.7539, lng: -7.2367, completed: false,
-                      endAlbergue: 'Triacastela',
-                      description: '輕鬆下山，享受加利西亞綠色山林的清新空氣。' },
-                    { day: 21, date: '6/16', from: 'Triacastela', to: 'Sarria', km: 24.2, difficulty: 'Medium', terrain: 'Rolling (Galicia)', lat: 42.7778, lng: -7.4125, completed: false,
-                      endAlbergue: 'dpCristal El Rinconcito（47.23磅，私人兩床房）',
-                      description: '可選 Samos 路線（24.2km，途經修道院）或 San Xil 路線（17km）。今晚預訂 dpCristal El Rinconcito 私人兩床房。' },
-                    // Day 22: 休息日 Sarria
-                    { day: 22, date: '6/17', from: 'Sarria', to: 'Sarria', km: 0, difficulty: 'None', type: 'rest', terrain: 'Rest Day', lat: 42.7778, lng: -7.4125, completed: false,
-                      startAlbergue: 'dpCristal El Rinconcito',
-                      endAlbergue: 'Albergue O Durmiñento（40€，三人房）',
-                      description: '💤 休息日：洗滌衣物、採購補給，等待 Emily 明天抵達。精神飽滿準備最後 100km 衝刺！' },
-                    // Day 23–27: Part 3 最後100公里
-                    { day: 23, date: '6/18', from: 'Sarria', to: 'Portomarín', km: 22, difficulty: 'Easy', terrain: 'Rolling (Galicia)', lat: 42.8067, lng: -7.6156, completed: false,
-                      endAlbergue: 'Portomarín',
-                      description: '最後100公里正式開始！Emily 今天會合。沿途小店密集，多蓋朝聖章。' },
-                    { day: 24, date: '6/19', from: 'Portomarín', to: 'Palas de Rei', km: 25.4, difficulty: 'Medium', terrain: 'Hills', lat: 42.8739, lng: -7.8692, completed: false,
-                      endAlbergue: 'Palas de Rei',
-                      description: '典型加利西亞丘陵地形，與來自世界各地的朝聖者並肩前行。' },
-                    { day: 25, date: '6/20', from: 'Palas de Rei', to: 'Arzúa', km: 28.1, difficulty: 'Hard', terrain: 'Rolling/Forest', lat: 42.9269, lng: -8.1644, completed: false,
-                      endAlbergue: 'Arzúa',
-                      description: '途經 Melide，一定要吃加利西亞名物章魚大餐 (Pulpo a feira)！' },
-                    { day: 26, date: '6/21', from: 'Arzúa', to: 'O Pedrouzo', km: 19.1, difficulty: 'Easy', terrain: 'Forest/Eucalyptus', lat: 42.9108, lng: -8.3617, completed: false,
-                      endAlbergue: 'O Pedrouzo',
-                      description: '穿梭充滿香氣的尤加利樹林，明天就能抵達終點了！' },
-                    { day: 27, date: '6/22', from: 'O Pedrouzo', to: 'Santiago de Compostela', km: 19.9, difficulty: 'Easy', terrain: 'Arrival', lat: 42.8805, lng: -8.5439, completed: false,
-                      endAlbergue: 'Nest Style Santiago',
-                      description: '🎉 榮耀日！走完最後一程，目標中午前抵達大教堂廣場參加朝聖者彌撒，並領取 Compostela 完成證書！' },
-                    // Day 28–30: 後段行程
-                    { day: 28, date: '6/23', from: 'Santiago', to: '世界盡頭 (Fisterra)', km: 0, difficulty: 'None', type: 'rest', terrain: '探索日', lat: 42.8805, lng: -8.5439, completed: false,
-                      endAlbergue: 'Hotel Hesperia Peregrino / Galicia Travels',
-                      description: '前往世界盡頭！Get Your Guide Tour 帶領探索 Fisterra，感受旅程的圓滿終結。' },
-                    { day: 29, date: '6/24', from: 'Santiago de Compostela', to: 'Madrid', km: 0, difficulty: 'None', type: 'train', terrain: '交通日', lat: 40.4168, lng: -3.7038, completed: false,
-                      startAlbergue: 'Santiago-Daniel Castelao 車站（提前 30 分鐘到站安檢）',
-                      endAlbergue: 'Latroupe Prado, Madrid',
-                      description: '🚂 AVE 04364次：7:48 從 Santiago 出發，10:57 抵達 Madrid Chamartín。西班牙國鐵建議提前 30 分鐘安檢。' },
-                    { day: 30, date: '6/25', from: 'Madrid', to: '台灣 / 英國', km: 0, difficulty: 'None', type: 'rest', terrain: '返家日', lat: 40.4168, lng: -3.7038, completed: false,
-                      description: '✈️ Randall 10:45 飛回台灣；Ivy / Emily 12:30 飛回英國。搭乘機場快速巴士 203 前往機場。Buen Camino！' }
+                    { day: 0, date: '5/26', from: 'Paris', to: 'Saint-Jean-Pied-de-Port', km: 0, difficulty: 'None', type: 'transport', terrain: '交通日', lat: 43.1636, lng: -1.2358, completed: false, startAlbergue: 'Le 55 Montparnasse Hotel, Paris', endAlbergue: '6 Rte d\'Arnéguy, 64220 Saint-Jean-Pied-de-Port', description: '🚐 7:05 從 Paris 出發，11:05 抵達 Bayonne，再轉車前往 SJPP。抵達後至朝聖辦公室領取朝聖者護照。' },
+                    { day: 1, date: '5/27', from: 'Saint-Jean-Pied-de-Port', to: 'Roncesvalles', km: 25, difficulty: 'Hard', terrain: 'Mountain', lat: 43.0094, lng: -1.3194, completed: false, startAlbergue: 'Saint-Jean-Pied-de-Port', endAlbergue: 'Roncesvalles', description: '法國之路最艱難也最壯麗的一天，翻越庇里牛斯山。出發前記得到朝聖辦公室（Pilgrim Information Office SJPP）蓋第一個章。' },
+                    { day: 2, date: '5/28', from: 'Roncesvalles', to: 'Zubiri', km: 21.3, difficulty: 'Medium', terrain: 'Forest Path', lat: 42.9309, lng: -1.5034, completed: false, startAlbergue: 'Roncesvalles', endAlbergue: 'Albergue El Palo de Avellano', description: '穿梭幽靜森林小徑，讓雙腿從第一天的山路中慢慢恢復。今晚入住 Albergue El Palo de Avellano。' },
+                    { day: 3, date: '5/29', from: 'Zubiri', to: 'Pamplona', km: 20.3, difficulty: 'Easy', terrain: 'Road/Path', lat: 42.8125, lng: -1.6458, completed: false, endAlbergue: 'Pamplona', description: '輕鬆走進第一個大城 Pamplona，記得參觀主教堂並享用 Tapas！' },
+                    { day: 4, date: '5/30', from: 'Pamplona', to: 'Puente la Reina', km: 23.7, difficulty: 'Medium', terrain: 'Alto del Perdón', lat: 42.6719, lng: -1.8153, completed: false, endAlbergue: 'Puente la Reina', description: '攀登著名的「寬恕之嶺」(Alto del Perdón)，與朝聖者鐵雕合影留念。' },
+                    { day: 5, date: '5/31', from: 'Puente la Reina', to: 'Estella', km: 22, difficulty: 'Medium', terrain: 'Rolling Hills', lat: 42.6713, lng: -2.0313, completed: false, endAlbergue: 'Estella', description: '享受中世紀村莊風光，Estella 歷史氛圍濃厚。' },
+                    { day: 6, date: '6/01', from: 'Estella', to: 'Los Arcos', km: 21.4, difficulty: 'Medium', terrain: 'Rolling', lat: 42.5694, lng: -2.1906, completed: false, endAlbergue: 'Los Arcos', description: '今天亮點是免費酒泉 Fuente de Vino，朝聖者可自由取用葡萄酒！' },
+                    { day: 7, date: '6/02', from: 'Los Arcos', to: 'Logroño', km: 27.7, difficulty: 'Hard', terrain: 'Rolling', lat: 42.4664, lng: -2.4456, completed: false, endAlbergue: 'Logroño', description: '走進 La Rioja 葡萄酒產區首都 Logroño，晚上必去 Laurel 街吃 Pintxos。' },
+                    { day: 8, date: '6/03', from: 'Logroño', to: 'Nájera', km: 28.3, difficulty: 'Hard', terrain: 'Vineyards', lat: 42.4156, lng: -2.7344, completed: false, endAlbergue: 'Nájera', description: '接近 30km 的一天，地勢平坦，沿途經過美麗的葡萄園。' },
+                    { day: 9, date: '6/04', from: 'Nájera', to: 'Santo Domingo de la Calzada', km: 20.9, difficulty: 'Easy', terrain: 'Rolling', lat: 42.4394, lng: -2.9536, completed: false, endAlbergue: 'Santo Domingo de la Calzada', description: '輕鬆的一天，終點是著名「雞舍奇蹟」教堂所在地。' },
+                    { day: 10, date: '6/05', from: 'Santo Domingo de la Calzada', to: 'Belorado', km: 22.7, difficulty: 'Medium', terrain: 'Flat', lat: 42.4194, lng: -3.1911, completed: false, endAlbergue: 'Hostel.B（59€，私人兩床房）', description: '今晚入住預訂好的 Hostel.B 私人兩床房（Calle Cuatro Cantones 4D, Belorado）。' },
+                    { day: 11, date: '6/06', from: 'Belorado', to: 'San Juan de Ortega', km: 23.9, difficulty: 'Medium', terrain: 'Forest', lat: 42.3758, lng: -3.4364, completed: false, endAlbergue: 'San Juan de Ortega', description: '穿越橡樹與松樹混合的森林，抵達由聖人自建的修道院聚落。' },
+                    { day: 12, date: '6/07', from: 'San Juan de Ortega', to: 'Burgos', km: 26, difficulty: 'Medium', terrain: 'Flat/Urban', lat: 42.3408, lng: -3.7028, completed: false, endAlbergue: 'Burgos', description: '抵達擁有世界遺產大教堂的 Burgos，第一段步行正式完結！明天搭火車前往 León。' },
+                    { day: 13, date: '6/08', from: 'Burgos', to: 'León', km: 0, difficulty: 'None', type: 'train', terrain: '火車移動', lat: 42.5987, lng: -5.5671, completed: false, startAlbergue: 'Burgos 火車站', endAlbergue: 'León', description: '🚂 9:34 從 Burgos 出發，12:01 抵達 León，車程約 2 小時，票價 38.8€。請於 Renfe 官網訂票。' },
+                    { day: 14, date: '6/09', from: 'León', to: 'Villar de Mazarife', km: 21, difficulty: 'Easy', terrain: 'Flat/Meseta', lat: 42.5581, lng: -5.7678, completed: false, endAlbergue: 'Villar de Mazarife', description: '從 León 出發，進入廣闊的麥塞塔高原，步道平坦，風景開闊。' },
+                    { day: 15, date: '6/10', from: 'Villar de Mazarife', to: 'Astorga', km: 30, difficulty: 'Hard', terrain: 'Flat/Meseta', lat: 42.4597, lng: -6.0567, completed: false, endAlbergue: 'Astorga', description: '今天是 30km 的長距離挑戰，終點 Astorga 有高第設計的主教宮值得一看。' },
+                    { day: 16, date: '6/11', from: 'Astorga', to: 'Rabanal del Camino', km: 19.8, difficulty: 'Easy', terrain: 'Rolling/Uphill', lat: 42.4789, lng: -6.2889, completed: false, endAlbergue: 'Rabanal del Camino', description: '輕鬆攀升進入山區，為明天的長程山路做準備。' },
+                    { day: 17, date: '6/12', from: 'Rabanal del Camino', to: 'Ponferrada', km: 32.2, difficulty: 'Hard', terrain: 'Mountain/Descent', lat: 42.5466, lng: -6.5967, completed: false, endAlbergue: 'Ponferrada', description: '翻越鐵十字架 (Cruz de Ferro)，在此放下石頭象徵卸下重擔。今天全程最長，下坡後抵達有聖殿騎士城堡的 Ponferrada。' },
+                    { day: 18, date: '6/13', from: 'Ponferrada', to: 'Villafranca del Bierzo', km: 24.7, difficulty: 'Medium', terrain: 'Rolling/Valley', lat: 42.6092, lng: -6.8092, completed: false, endAlbergue: 'Villafranca del Bierzo', description: '沿著比埃爾佐河谷行走，Villafranca 是進入加利西亞前最後的大鎮。' },
+                    { day: 19, date: '6/14', from: 'Villafranca del Bierzo', to: 'O Cebreiro', km: 28.8, difficulty: 'Hard', terrain: 'Mountain Climb', lat: 42.7064, lng: -7.0428, completed: false, endAlbergue: 'O Cebreiro', description: '最後一次大爬坡！攀登至 1300 公尺的 O Cebreiro，正式進入加利西亞省。' },
+                    { day: 20, date: '6/15', from: 'O Cebreiro', to: 'Triacastela', km: 20.8, difficulty: 'Easy', terrain: 'Descent/Rolling', lat: 42.7539, lng: -7.2367, completed: false, endAlbergue: 'Triacastela', description: '輕鬆下山，享受加利西亞綠色山林的清新空氣。' },
+                    { day: 21, date: '6/16', from: 'Triacastela', to: 'Sarria', km: 24.2, difficulty: 'Medium', terrain: 'Rolling (Galicia)', lat: 42.7778, lng: -7.4125, completed: false, endAlbergue: 'dpCristal El Rinconcito（47.23磅，私人兩床房）', description: '可選 Samos 路線（24.2km，途經修道院）或 San Xil 路線（17km）。今晚預訂 dpCristal El Rinconcito 私人兩床房。' },
+                    { day: 22, date: '6/17', from: 'Sarria', to: 'Sarria', km: 0, difficulty: 'None', type: 'rest', terrain: 'Rest Day', lat: 42.7778, lng: -7.4125, completed: false, startAlbergue: 'dpCristal El Rinconcito', endAlbergue: 'Albergue O Durmiñento（40€，三人房）', description: '💤 休息日：洗滌衣物、採購補給，等待 Emily 明天抵達。精神飽滿準備最後 100km 衝刺！' },
+                    { day: 23, date: '6/18', from: 'Sarria', to: 'Portomarín', km: 22, difficulty: 'Easy', terrain: 'Rolling (Galicia)', lat: 42.8067, lng: -7.6156, completed: false, endAlbergue: 'Portomarín', description: '最後100公里正式開始！Emily 今天會合。沿途小店密集，多蓋朝聖章。' },
+                    { day: 24, date: '6/19', from: 'Portomarín', to: 'Palas de Rei', km: 25.4, difficulty: 'Medium', terrain: 'Hills', lat: 42.8739, lng: -7.8692, completed: false, endAlbergue: 'Palas de Rei', description: '典型加利西亞丘陵地形，與來自世界各地的朝聖者並肩前行。' },
+                    { day: 25, date: '6/20', from: 'Palas de Rei', to: 'Arzúa', km: 28.1, difficulty: 'Hard', terrain: 'Rolling/Forest', lat: 42.9269, lng: -8.1644, completed: false, endAlbergue: 'Arzúa', description: '途經 Melide，一定要吃加利西亞名物章魚大餐 (Pulpo a feira)！' },
+                    { day: 26, date: '6/21', from: 'Arzúa', to: 'O Pedrouzo', km: 19.1, difficulty: 'Easy', terrain: 'Forest/Eucalyptus', lat: 42.9108, lng: -8.3617, completed: false, endAlbergue: 'O Pedrouzo', description: '穿梭充滿香氣的尤加利樹林，明天就能抵達終點了！' },
+                    { day: 27, date: '6/22', from: 'O Pedrouzo', to: 'Santiago de Compostela', km: 19.9, difficulty: 'Easy', terrain: 'Arrival', lat: 42.8805, lng: -8.5439, completed: false, endAlbergue: 'Nest Style Santiago', description: '🎉 榮耀日！走完最後一程，目標中午前抵達大教堂廣場參加朝聖者彌撒，並領取 Compostela 完成證書！' },
+                    { day: 28, date: '6/23', from: 'Santiago', to: '世界盡頭 (Fisterra)', km: 0, difficulty: 'None', type: 'rest', terrain: '探索日', lat: 42.8805, lng: -8.5439, completed: false, endAlbergue: 'Hotel Hesperia Peregrino / Galicia Travels', description: '前往世界盡頭！Get Your Guide Tour 帶領探索 Fisterra，感受旅程的圓滿終結。' },
+                    { day: 29, date: '6/24', from: 'Santiago de Compostela', to: 'Madrid', km: 0, difficulty: 'None', type: 'train', terrain: '交通日', lat: 40.4168, lng: -3.7038, completed: false, startAlbergue: 'Santiago-Daniel Castelao 車站（提前 30 分鐘到站安檢）', endAlbergue: 'Latroupe Prado, Madrid', description: '🚂 AVE 04364次：7:48 從 Santiago 出發，10:57 抵達 Madrid Chamartín。西班牙國鐵建議提前 30 分鐘安檢。' },
+                    { day: 30, date: '6/25', from: 'Madrid', to: '台灣 / 英國', km: 0, difficulty: 'None', type: 'rest', terrain: '返家日', lat: 40.4168, lng: -3.7038, completed: false, description: '✈️ Randall 10:45 飛回台灣；Ivy / Emily 12:30 飛回英國。搭乘機場快速巴士 203 前往機場。Buen Camino！' }
                 ]);
 
-                // 模擬數據：POI
                 const pois = [
-                    // Part 1 Specific Albergues
                     { id: 1, lat: 43.0094, lng: -1.3194, name: "Albergue de Peregrinos de Roncesvalles", type: "albergue", category: "教會", location: "Roncesvalles", price: "€14", beds: 183, phone: "+34 948 760 000", facilities: ["kitchen", "laundry", "wifi", "dinner"], landmarks: "聖瑪莉亞聯合教堂", description: "歷史悠久且規模宏大的朝聖者庇護所。" },
                     { id: 102, lat: 42.9309, lng: -1.5034, name: "Albergue Municipal de Zubiri", type: "albergue", category: "公立", location: "Zubiri", price: "€10", beds: 46, phone: "無", facilities: ["hot_water", "kitchen"], landmarks: "狂犬病之橋", description: "舊小學改建，基本設施。" },
                     { id: 103, lat: 42.8185, lng: -1.6443, name: "Albergue de Peregrinos Jesús y María", type: "albergue", category: "公立", location: "Pamplona", price: "€11", beds: 112, phone: "+34 948 22 26 44", facilities: ["kitchen", "laundry", "wifi"], landmarks: "潘普洛納主教堂", description: "位於市中心，現代化改建的古老教堂。" },
@@ -1077,21 +935,12 @@
                     { id: 109, lat: 42.4394, lng: -2.9536, name: "Albergue de Peregrinos de la Cofradía del Santo", type: "albergue", category: "教會", location: "Santo Domingo de la Calzada", price: "€10", beds: 215, phone: "+34 941 34 00 33", facilities: ["kitchen", "laundry"], landmarks: "聖多明哥大教堂", description: "歷史悠久，床位眾多。" },
                     { id: 110, lat: 42.4194, lng: -3.1911, name: "Albergue de Peregrinos A Santiago", type: "albergue", category: "私立", location: "Belorado", price: "€12", beds: 40, phone: "+34 947 58 06 17", facilities: ["pool", "bar", "wifi"], landmarks: "聖瑪莉亞教堂", description: "舒適的私立庇護所，有泳池。" },
                     { id: 112, lat: 42.3408, lng: -3.7028, name: "Albergue Municipal de Peregrinos de Burgos", type: "albergue", category: "公立", location: "Burgos", price: "€5", beds: 150, phone: "+34 947 26 31 49", facilities: ["kitchen", "laundry", "wifi"], landmarks: "布爾戈斯主教堂", description: "即 Casa de los Cubos，位置絕佳。" },
-
-                    // Part 2 & 3 Specific Albergues
                     { id: 301, lat: 42.7778, lng: -7.4125, name: "Albergue Internacional Monasterio de la Magdalena", type: "albergue", category: "私立", location: "Sarria", price: "€12", beds: 110, phone: "+34 982 53 05 52", facilities: ["laundry", "kitchen", "wifi"], landmarks: "馬格達萊納修道院", description: "位於修道院內的庇護所，環境清幽，適合休息恢復。" },
-                    
                     { id: 125, lat: 42.8067, lng: -7.6156, name: "Albergue de Peregrinos de la Xunta de Portomarín", type: "albergue", category: "Xunta", location: "Portomarín", price: "€10", beds: 114, phone: "無", facilities: ["kitchen", "laundry"], landmarks: "堡壘教堂", description: "加利西亞公立庇護所 (Xunta)，不能預訂，需排隊。" },
-                    
                     { id: 126, lat: 42.8739, lng: -7.8692, name: "Albergue de Peregrinos de la Xunta de Palas de Rei", type: "albergue", category: "Xunta", location: "Palas de Rei", price: "€10", beds: 60, phone: "無", facilities: ["kitchen"], landmarks: "聖提爾索教堂", description: "加利西亞公立庇護所。" },
-                    
                     { id: 127, lat: 42.9269, lng: -8.1644, name: "Albergue de Peregrinos de la Xunta de Arzúa", type: "albergue", category: "Xunta", location: "Arzúa", price: "€10", beds: 46, phone: "無", facilities: ["kitchen"], landmarks: "聖瑪莉亞教堂", description: "公立庇護所，床位較少，建議提早抵達或選擇私立。" },
-                    
                     { id: 128, lat: 42.9108, lng: -8.3617, name: "Albergue de Peregrinos de la Xunta de Arca do Pino", type: "albergue", category: "Xunta", location: "O Pedrouzo", price: "€10", beds: 126, phone: "無", facilities: ["kitchen", "wifi"], landmarks: "聖艾拉莉亞教堂", description: "位於 O Pedrouzo 的公立庇護所，距離聖地牙哥最後一站。" },
-                    
                     { id: 129, lat: 42.8805, lng: -8.5439, name: "Seminario Menor de la Asunción", type: "albergue", category: "私立", location: "Santiago de Compostela", price: "€17", beds: 177, phone: "+34 981 58 92 00", facilities: ["kitchen", "laundry", "single_rooms", "wifi"], landmarks: "聖地牙哥主教座堂", description: "由神學院改建，空間巨大，有單人房選項，就在貝爾維斯公園旁。" },
-
-                     // --- 知名景點 (Sights) ---
                     { id: 201, lat: 43.1630, lng: -1.2350, name: "聖雅各之門 (Porte St-Jacques)", type: "sight", description: "法國之路的傳統起點，聯合國教科文組織世界遺產。" },
                     { id: 202, lat: 43.0094, lng: -1.3194, name: "朗塞斯瓦列斯聯合教堂", type: "sight", description: "埋葬著羅蘭的傳說之地，哥德式建築的瑰寶，氣氛莊嚴。" },
                     { id: 203, lat: 42.8185, lng: -1.6443, name: "潘普洛納主教堂", type: "sight", description: "擁有西班牙最美迴廊之一的哥德式教堂，是奔牛節城市的中心。" },
@@ -1106,13 +955,10 @@
                     { id: 212, lat: 42.5466, lng: -6.5967, name: "龐費拉達聖殿騎士城堡", type: "sight", description: "保存完好的中世紀聖殿騎士團城堡，規模宏大。" },
                     { id: 213, lat: 42.7064, lng: -7.0428, name: "O Cebreiro 茅草屋", type: "sight", description: "加利西亞山區特有的圓形茅草屋 (Pallozas)，彷彿走進古代村落。" },
                     { id: 214, lat: 42.8805, lng: -8.5439, name: "聖地牙哥主教座堂", type: "sight", description: "朝聖之路的終點，使徒聖雅各的安息之地，所有朝聖者旅程的目標。" },
-
-                    // --- 補充服務點 ---
                     { id: 2, lat: 42.8150, lng: -1.6400, name: "Casa Sabina", type: "food", description: "提供朝聖者套餐 (Menú del Peregrino) €12。" },
                     { id: 3, lat: 42.8100, lng: -1.6500, name: "公共飲水泉", type: "water", description: "可飲用水 (Potable)。" }
                 ];
 
-                // 裝備清單
                 const packingList = ref({
                     "文件": [
                         { name: "朝聖者護照 (Credencial)", checked: true, weight: 50 },
@@ -1147,23 +993,16 @@
                     ]
                 });
 
-                // 新增項目暫存區
                 const newItemInput = ref({});
                 for (const cat in packingList.value) {
                     newItemInput.value[cat] = { name: '', weight: null };
                 }
 
-                // 計算屬性
-                // 總公里數包含虛擬的巴士移動距離
                 const totalKm = computed(() => stages.value.reduce((acc, s) => acc + s.km + (s.virtualKm || 0), 0));
-                
-                // 完成公里數也包含虛擬距離
                 const completedKm = computed(() => stages.value.filter(s => s.completed).reduce((acc, s) => acc + s.km + (s.virtualKm || 0), 0));
-                
                 const remainingKm = computed(() => (totalKm.value - completedKm.value).toFixed(1));
                 const progressPercentage = computed(() => Math.round((completedKm.value / totalKm.value) * 100));
                 
-                // 背包總重計算 (單位: kg)
                 const totalWeight = computed(() => {
                     let w = 0;
                     for (const cat in packingList.value) {
@@ -1174,7 +1013,6 @@
 
                 const nextStage = computed(() => stages.value.find(s => !s.completed));
 
-                // 保留供地圖 POI 功能使用
                 const nextRecommendedAlbergue = computed(() => {
                     if (!nextStage.value || !nextStage.value.endAlbergue) return null;
                     return pois.find(p => p.name === nextStage.value.endAlbergue);
@@ -1185,22 +1023,17 @@
                     return next ? `前往 ${next.to}` : '恭喜抵達 Santiago!';
                 });
                 
-                // 預估天數只計算實際步行的剩餘天數 (排除休息日與巴士)
                 const estimatedDays = computed(() => {
                     const remainingTotal = stages.value.filter(s => !s.completed).length;
                     return remainingTotal;
                 });
 
-                // --- 資料持久化 (localStorage) ---
                 const STORAGE_KEY = 'camino-app-v1';
 
                 const saveState = () => {
                     const state = {
-                        // 只儲存完成狀態，避免覆蓋路段的靜態資訊
                         stageStatus: stages.value.map(s => s.completed),
-                        // 裝備清單可能會有新增項目，所以存整個物件
                         packingList: packingList.value,
-                        // 儲存打卡紀錄
                         journeyLogs: journeyLogs.value
                     };
                     localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
@@ -1211,8 +1044,6 @@
                     if (saved) {
                         try {
                             const parsed = JSON.parse(saved);
-                            
-                            // 還原路段完成狀態
                             if (parsed.stageStatus && Array.isArray(parsed.stageStatus)) {
                                 parsed.stageStatus.forEach((status, idx) => {
                                     if (stages.value[idx]) {
@@ -1220,13 +1051,9 @@
                                     }
                                 });
                             }
-
-                            // 還原裝備清單
                             if (parsed.packingList) {
                                 packingList.value = parsed.packingList;
                             }
-
-                            // 還原打卡紀錄
                             if (parsed.journeyLogs) {
                                 journeyLogs.value = parsed.journeyLogs;
                             }
@@ -1236,11 +1063,9 @@
                     }
                 };
 
-                // 方法
                 const setView = (view) => {
                     currentView.value = view;
                     if (view === 'map') {
-                        // 延遲初始化地圖，確保容器可見
                         setTimeout(() => {
                             if (!map) {
                                 initMap();
@@ -1252,21 +1077,18 @@
                     }
                 };
                 
-                // 計算並縮放至路線範圍
                 const fitRoute = () => {
                     if (!map) return;
                     const routeCoordinates = [
-                        [startPoint.lat, startPoint.lng], // 起點
-                        ...stages.value.map(s => [s.lat, s.lng]) // 各路段終點
+                        [startPoint.lat, startPoint.lng],
+                        ...stages.value.map(s => [s.lat, s.lng])
                     ];
                     const bounds = L.latLngBounds(routeCoordinates);
                     map.fitBounds(bounds, { padding: [50, 50] });
                 };
 
-                // 跳轉並定位到特定路段
                 const flyToStage = (index) => {
                     setView('map');
-                    // 給一點時間讓 setView 切換完畢
                     setTimeout(() => {
                         const stage = stages.value[index];
                         if (map) {
@@ -1281,7 +1103,6 @@
                     setTimeout(() => toastMsg.value = '', 2000);
                 };
 
-                // 快速打卡功能 (Quick Log)
                 const quickLog = () => {
                     const now = new Date();
                     const dateStr = now.toLocaleDateString();
@@ -1339,9 +1160,6 @@
                     }
                 };
 
-                // 裝備項目操作 Sheet
-
-                // 自訂確認對話框
                 const confirmDialog = ref({ visible: false, title: '', message: '', onConfirm: null });
                 const showConfirm = (title, message, onConfirm) => {
                     confirmDialog.value = { visible: true, title, message, onConfirm };
@@ -1352,7 +1170,6 @@
                 };
                 const cancelConfirm = () => { confirmDialog.value.visible = false; };
 
-                // 自訂備註編輯 Sheet
                 const editNoteSheet = ref({ visible: false, log: null, text: '' });
                 const openEditSheet = (log) => {
                     editNoteSheet.value = { visible: true, log, text: log.note || '' };
@@ -1401,8 +1218,7 @@
                     packingList.value[cat][idx].checked = !packingList.value[cat][idx].checked;
                 };
 
-                // --- Drag-to-Reorder ---
-                const DRAG_ITEM_HEIGHT = 66; // 58px height + 8px gap
+                const DRAG_ITEM_HEIGHT = 66;
 
                 const getEventPoint = (e) => ({
                     x: e.touches ? e.touches[0].clientX : e.clientX,
@@ -1450,7 +1266,6 @@
                     dragSort.value.toIndex = newTo;
                 };
 
-                // 放手時暫停 transition，避免 key-by-index 造成的錯位動畫
                 const isReordering = ref(false);
 
                 const onDragEnd = () => {
@@ -1462,7 +1277,7 @@
                     const { category, fromIndex, toIndex } = dragSort.value;
                     dragSort.value.active = false;
                     if (fromIndex !== toIndex) {
-                        isReordering.value = true; // 暫停 transition，避免 key-by-index 錯位動畫
+                        isReordering.value = true;
                         const items = packingList.value[category];
                         const [moved] = items.splice(fromIndex, 1);
                         items.splice(toIndex, 0, moved);
@@ -1485,8 +1300,6 @@
                     return {};
                 };
 
-
-                // 新增項目功能
                 const addItem = (category) => {
                     const input = newItemInput.value[category];
                     if (!input.name) return;
@@ -1505,7 +1318,6 @@
                     editForm.value = { name: item.name, weight: item.weight || 0 };
                 };
 
-                // 儲存編輯
                 const saveEdit = (category, index) => {
                     if (!editForm.value.name) return;
                     const item = packingList.value[category][index];
@@ -1598,7 +1410,6 @@
                     });
                 };
 
-                // 新增：在地圖上繪製足跡 (連線與點)
                 const updateJourneyOnMap = () => {
                     if (!map || !journeyLayerGroup) return;
 
@@ -1649,37 +1460,30 @@
                     });
                 };
 
-                // Map Initialization
                 let markers = [];
                 const initMap = () => {
                     if (map) return;
                     
-                    // 初始化地圖
                     map = L.map('map', { zoomControl: false });
-                    
-                    // 初始化足跡圖層群組並加入地圖
                     journeyLayerGroup = L.layerGroup().addTo(map);
                     
-                    // 使用 OpenStreetMap tiles
                     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-                        attribution: '&copy; OSM',
+                        attribution: '© OSM',
                         maxZoom: 19
                     }).addTo(map);
 
-                    // --- 繪製路線 (Polyline) ---
                     const routeCoordinates = [
-                        [startPoint.lat, startPoint.lng], // 起點
-                        ...stages.value.map(s => [s.lat, s.lng]) // 各路段終點
+                        [startPoint.lat, startPoint.lng],
+                        ...stages.value.map(s => [s.lat, s.lng])
                     ];
 
                     L.polyline(routeCoordinates, { 
-                        color: '#f59e0b', // Camino Yellow
+                        color: '#f59e0b', 
                         weight: 5, 
                         opacity: 0.8,
                         lineCap: 'round'
                     }).addTo(map);
 
-                    // 在每個路段終點加上小圓點標記
                     routeCoordinates.forEach((coord, index) => {
                         L.circleMarker(coord, {
                             radius: 4,
@@ -1756,7 +1560,6 @@
                     setTimeout(() => showToast("下載完成 (模擬)"), 1500);
                 };
 
-                // 新增：導航功能
                 const navigateToPOI = (poi) => {
                     if (!poi) return;
                     const url = `https://www.google.com/maps/dir/?api=1&destination=${poi.lat},${poi.lng}`;
@@ -1769,14 +1572,12 @@
                     document.body.removeChild(a);
                 };
 
-                // 生命週期
                 onMounted(() => {
                     loadState();
                     fetchWeather();
                     initAuth();
                 });
 
-                // 監聽器
                 watch(stages, () => saveState(), { deep: true });
                 watch(packingList, () => saveState(), { deep: true });
                 watch(journeyLogs, () => {
@@ -1793,7 +1594,6 @@
                     expandedStageIndex,
                     selectedPOI,
                     filters,
-                    // Computed
                     totalKm,
                     completedKm,
                     remainingKm,
@@ -1802,7 +1602,6 @@
                     estimatedDays,
                     nextStage,
                     nextRecommendedAlbergue,
-                    // Methods
                     setView,
                     quickLog,
                     toggleStage,
@@ -1833,6 +1632,7 @@
                     fitRoute,
                     navigateToPOI, 
                     journeyLogs, 
+                    isLogSheetExpanded, 
                     clearLogs,
                     deleteLog,
                     editLogNote,
@@ -1843,16 +1643,13 @@
                     saveEditSheet,
                     cancelEditSheet,
                     openGoogleMaps, 
-                    // Packing list edit mode
                     editModeCategory,
                     toggleEditMode,
                     deleteItemDirect,
                     startDragFromHandle,
-                    // Drag to reorder
                     dragSort,
                     isReordering,
                     getItemStyle,
-                    // Auth
                     currentUser,
                     authEmail,
                     authPassword,
