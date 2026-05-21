@@ -255,6 +255,50 @@
                 <div v-else-if="!nextStage" class="bg-white rounded-2xl p-5 shadow-sm border border-gray-100 flex items-center justify-center gap-2 text-gray-500 text-sm">
                     <i class="fa-solid fa-circle-check text-green-500"></i> 恭喜！所有行程已完成。
                 </div>
+
+                <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+                    <div class="px-5 py-3 border-b border-gray-100 flex justify-between items-center">
+                        <h3 class="text-sm font-bold text-gray-700">我的足跡 ({{ journeyLogs.length }})</h3>
+                        <button v-if="journeyLogs.length > 0" @click="clearLogs" class="text-xs text-gray-400 hover:text-red-500">全部清除</button>
+                    </div>
+                    <div class="p-4">
+                        <div v-if="journeyLogs.length > 0" class="space-y-3">
+                            <div v-for="(log, idx) in journeyLogs.slice().reverse()" :key="log.id"
+                                 class="bg-gray-50 p-4 rounded-xl border border-gray-100 flex items-start gap-3">
+                                <div class="bg-yellow-100 text-yellow-600 w-8 h-8 rounded-full flex items-center justify-center shrink-0 text-xs mt-0.5">
+                                    <i class="fa-solid fa-location-dot"></i>
+                                </div>
+                                <div class="flex-1 min-w-0">
+                                    <div class="flex justify-between items-start">
+                                        <span class="font-bold text-gray-800 text-sm">打卡紀錄 #{{ journeyLogs.length - idx }}</span>
+                                    </div>
+                                    <p class="text-xs text-gray-500 mt-0.5">{{ log.date }} {{ log.time }}</p>
+                                    <p v-if="log.coords" class="text-[10px] text-blue-400 mt-1 flex items-center gap-1 cursor-pointer" @click="openGoogleMaps(log.coords)">
+                                        <i class="fa-solid fa-map-pin"></i> {{ log.coords }}
+                                    </p>
+                                    <p v-if="log.note" class="text-xs text-gray-600 mt-2 bg-white p-2 rounded border border-gray-100">
+                                        <i class="fa-regular fa-comment-dots mr-1"></i> {{ log.note }}
+                                    </p>
+                                </div>
+                                <div class="flex flex-col gap-2 ml-1">
+                                    <button @click="editLogNote(log)" class="text-gray-300 hover:text-blue-500 p-1">
+                                        <i class="fa-solid fa-pen text-xs"></i>
+                                    </button>
+                                    <button @click="deleteLog(log.id)" class="text-gray-300 hover:text-red-500 p-1">
+                                        <i class="fa-solid fa-trash-can text-xs"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                        <div v-else class="flex flex-col items-center justify-center text-center py-8">
+                            <div class="bg-gray-200 w-12 h-12 rounded-full flex items-center justify-center mb-3 text-gray-400">
+                                <i class="fa-solid fa-shoe-prints text-xl"></i>
+                            </div>
+                            <p class="text-sm text-gray-500 font-medium">尚無足跡紀錄</p>
+                            <p class="text-xs text-gray-400 mt-1">點擊下方黃色按鈕開始記錄！</p>
+                        </div>
+                    </div>
+                </div>
             </div>
 
             <div v-show="currentView === 'map'" style="flex: 1 1 0; min-height: 0; position: relative; overflow: hidden; z-index: 10;">
@@ -361,59 +405,6 @@
                     </div>
                 </transition>
 
-                <div class="absolute inset-x-0 bottom-0 flex flex-col bg-white shadow-[0_-4px_20px_rgba(0,0,0,0.15)] rounded-t-3xl transition-all duration-300 z-[400]"
-                     :class="isLogSheetExpanded ? 'h-[65%]' : 'h-14'">
-                    
-                    <div class="flex flex-col items-center shrink-0 w-full cursor-pointer bg-white rounded-t-3xl" @click="isLogSheetExpanded = !isLogSheetExpanded">
-                        <div class="w-12 h-1.5 bg-gray-300 rounded-full mt-3 mb-2"></div>
-                        <div class="px-5 pb-3 w-full flex justify-between items-center border-b border-gray-100">
-                            <h3 class="text-sm font-bold text-gray-700">我的足跡 ({{ journeyLogs.length }})</h3>
-                            <div class="flex items-center gap-4">
-                                <button v-if="journeyLogs.length > 0" @click.stop="clearLogs" class="text-xs text-gray-400 hover:text-red-500">全部清除</button>
-                                <i class="fa-solid fa-chevron-up text-gray-400 transition-transform duration-300" :class="isLogSheetExpanded ? 'rotate-180' : ''"></i>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="flex-1 p-4 overflow-y-auto hide-scrollbar bg-gray-50 pb-8">
-                        <div v-if="journeyLogs.length > 0" class="space-y-3">
-                            <div v-for="(log, idx) in journeyLogs.slice().reverse()" :key="log.id" 
-                                 class="bg-white p-4 rounded-xl shadow-sm border border-gray-100 flex items-start gap-3">
-                                <div class="bg-yellow-100 text-yellow-600 w-8 h-8 rounded-full flex items-center justify-center shrink-0 text-xs mt-0.5">
-                                    <i class="fa-solid fa-location-dot"></i>
-                                </div>
-                                <div class="flex-1 min-w-0">
-                                    <div class="flex justify-between items-start">
-                                        <span class="font-bold text-gray-800 text-sm">打卡紀錄 #{{ journeyLogs.length - idx }}</span>
-                                    </div>
-                                    <p class="text-xs text-gray-500 mt-0.5">{{ log.date }} {{ log.time }}</p>
-                                    <p v-if="log.coords" class="text-[10px] text-blue-400 mt-1 flex items-center gap-1 cursor-pointer" @click="openGoogleMaps(log.coords)">
-                                        <i class="fa-solid fa-map-pin"></i> {{ log.coords }}
-                                    </p>
-                                    <p v-if="log.note" class="text-xs text-gray-600 mt-2 bg-gray-50 p-2 rounded border border-gray-100">
-                                        <i class="fa-regular fa-comment-dots mr-1"></i> {{ log.note }}
-                                    </p>
-                                </div>
-                                <div class="flex flex-col gap-2 ml-1">
-                                    <button @click="editLogNote(log)" class="text-gray-300 hover:text-blue-500 p-1">
-                                        <i class="fa-solid fa-pen text-xs"></i>
-                                    </button>
-                                    <button @click="deleteLog(log.id)" class="text-gray-300 hover:text-red-500 p-1">
-                                        <i class="fa-solid fa-trash-can text-xs"></i>
-                                    </button>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div v-else class="h-full flex flex-col items-center justify-center text-center pb-10">
-                            <div class="bg-gray-200 w-12 h-12 rounded-full flex items-center justify-center mb-3 text-gray-400">
-                                <i class="fa-solid fa-shoe-prints text-xl"></i>
-                            </div>
-                            <p class="text-sm text-gray-500 font-medium">尚無足跡紀錄</p>
-                            <p class="text-xs text-gray-400 mt-1">點擊下方黃色按鈕開始記錄！</p>
-                        </div>
-                    </div>
-                </div>
             </div>
 
             <div v-if="currentView === 'stages'" class="flex-grow h-full overflow-y-auto hide-scrollbar p-4 space-y-3 pb-36">
@@ -760,7 +751,6 @@
                 const expandedStageIndex = ref(null);
                 const isWeatherExpanded = ref(false); // 預設收合
                 const journeyLogs = ref([]); // 打卡紀錄
-                const isLogSheetExpanded = ref(false); // 修正：控制地圖頁打卡紀錄展開狀態
 
                 // Auth 狀態
                 const currentUser = ref(null);
@@ -1633,7 +1623,6 @@
                     fitRoute,
                     navigateToPOI, 
                     journeyLogs, 
-                    isLogSheetExpanded, 
                     clearLogs,
                     deleteLog,
                     editLogNote,
